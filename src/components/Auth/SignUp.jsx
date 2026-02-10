@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { signUp, confirmSignUp } from 'aws-amplify/auth'
 
 function SignUp({ onSuccess, onSwitchToSignIn }) {
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -19,6 +20,11 @@ function SignUp({ onSuccess, onSwitchToSignIn }) {
       return
     }
 
+    if (!name.trim()) {
+      setError('Please enter your name')
+      return
+    }
+
     setLoading(true)
 
     try {
@@ -27,7 +33,8 @@ function SignUp({ onSuccess, onSwitchToSignIn }) {
         password: password,
         options: {
           userAttributes: {
-            email: email
+            email: email,
+            name: name
           }
         }
       })
@@ -114,6 +121,18 @@ function SignUp({ onSuccess, onSwitchToSignIn }) {
         <p className="auth-subtitle">Sign up to get started</p>
 
         <form onSubmit={handleSignUp} className="auth-form">
+          <div className="form-group">
+            <label htmlFor="name">Full Name</label>
+            <input
+              id="name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="John Doe"
+              required
+            />
+          </div>
+
           <div className="form-group">
             <label htmlFor="email">Email</label>
             <input
