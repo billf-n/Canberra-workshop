@@ -696,12 +696,24 @@ button:active {
 
 .auth-form input {
     margin-bottom: 0;
+    padding: 16px;
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    font-size: 16px;
+    transition: all var(--transition-fast);
+    font-family: inherit;
+    color: var(--text-dark);
+}
+
+.auth-form input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(212, 165, 116, 0.15);
 }
 
 .form-hint {
     font-size: 12px;
     color: var(--text-light);
-    margin-top: -8px;
 }
 
 .btn-auth-primary {
