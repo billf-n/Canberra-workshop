@@ -3,6 +3,11 @@ import { useState } from 'react'
 function EmailStep({ email, updateFormData, nextStep, prevStep }) {
   const [error, setError] = useState('')
 
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return emailRegex.test(email)
+  }
+
   const handleChange = (e) => {
     updateFormData('email', e.target.value)
     setError('')
@@ -11,6 +16,10 @@ function EmailStep({ email, updateFormData, nextStep, prevStep }) {
   const handleContinue = () => {
     if (!email.trim()) {
       setError('Please enter your email')
+      return
+    }
+    if (!validateEmail(email)) {
+      setError('Please enter a valid email address')
       return
     }
     nextStep()
