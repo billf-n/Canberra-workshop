@@ -72,9 +72,6 @@ function EventForm({ onNavigate, onEventSubmit, user }) {
 
       await response.json().catch(() => { })
       console.log('Event submitted successfully, agent analyzing...')
-      setCurrentView('loading')
-      await new Promise(resolve => setTimeout(resolve, 5000))
-
 
       // Reset form
       setFormData({
@@ -90,7 +87,9 @@ function EventForm({ onNavigate, onEventSubmit, user }) {
       })
       setCurrentStep(1)
       setSubmitError('')
-      onNavigate('')
+      
+      // Navigate to loading page
+      navigate('/loading')
     } catch (error) {
       console.error('Submission error:', error)
       setSubmitError(`Failed to submit event: ${error.message}`)
@@ -186,8 +185,8 @@ function EventForm({ onNavigate, onEventSubmit, user }) {
         <StepCounter currentStep={currentStep} totalSteps={TOTAL_STEPS} />
       </div>
       <form onSubmit={(e) => e.preventDefault()}>
-        <input name="userId" className="form-hidden-input" value={user.userId}></input>
-        <input name="userEmail" className="form-hidden-input" value={user.signInDetails.loginId}></input>
+        <input name="userId" className="form-hidden-input" value={user.userId} readOnly></input>
+        <input name="userEmail" className="form-hidden-input" value={user.signInDetails.loginId} readOnly></input>
         {renderStep()}
       </form>
     </div>

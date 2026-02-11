@@ -107,6 +107,14 @@ function App() {
           />
         } 
       />
+      <Route 
+        path="/loading" 
+        element={
+          <LoadingPage 
+            onNavigate={(view) => navigate(`/${view}`)}
+          />
+        } 
+      />
     </Routes>
   )
 }
