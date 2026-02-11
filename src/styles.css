@@ -1368,3 +1368,83 @@ button:active {
     font-size: 15px;
     line-height: 1.8;
 }
+
+/* Selected Vendor Styles */
+.quote-card.greyed-out {
+    opacity: 0.4;
+    filter: grayscale(100%);
+    pointer-events: all;
+}
+
+.quote-card.selected-vendor {
+    border: 3px solid #28a745;
+    background: #f0fff4;
+    box-shadow: 0 4px 20px rgba(40, 167, 69, 0.3);
+}
+
+.quote-card.selected-vendor h3 {
+    color: #28a745;
+}
+
+/* Pick Vendor Button */
+.btn-pick-vendor {
+    width: 100%;
+    margin-top: var(--spacing-sm);
+    padding: 10px 16px;
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: var(--white);
+    border: none;
+    border-radius: var(--border-radius-sm);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.btn-pick-vendor:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+}
+
+/* Confirm Button */
+.btn-confirm {
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: var(--white);
+    border: none;
+    border-radius: var(--border-radius-sm);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.btn-confirm:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+}
+
+.confirm-modal .modal-content {
+    max-width: 500px;
+}
+
+/* Unselect Vendor Button */
+.btn-unselect {
+    width: 100%;
+    margin-top: var(--spacing-xs);
+    padding: 10px 16px;
+    background: #dc3545;
+    color: var(--white);
+    border: none;
+    border-radius: var(--border-radius-sm);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.btn-unselect:hover {
+    background: #c82333;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+}

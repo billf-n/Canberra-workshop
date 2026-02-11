@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { getCurrentUser } from 'aws-amplify/auth'
 import { useNavigate } from 'react-router-dom'
-import { getEventsByUserId } from '../services/dynamodb'
+import { getEventsByUserId, updateVendorSelection } from '../services/dynamodb'
 
 function ExistingEvents({ onNavigate }) {
   const [user, setUser] = useState(null)
@@ -19,6 +19,9 @@ function ExistingEvents({ onNavigate }) {
   const [aiRecommendationModalOpen, setAiRecommendationModalOpen] = useState(false)
   const [aiRecommendation, setAiRecommendation] = useState('')
   const [loadingRecommendation, setLoadingRecommendation] = useState(false)
+  const [selectedVendor, setSelectedVendor] = useState(null)
+  const [confirmModalOpen, setConfirmModalOpen] = useState(false)
+  const [vendorToConfirm, setVendorToConfirm] = useState(null)
 
   useEffect(() => {
     checkUser()
@@ -29,6 +32,16 @@ function ExistingEvents({ onNavigate }) {
       fetchEvents()
     }
   }, [user])
+
+  useEffect(() => {
+    // Find the selected vendor from the event quotes
+    if (selectedEvent && selectedEvent.quotes) {
+      const selected = selectedEvent.quotes.find(q => q.selected === true)
+      if (selected) {
+        setSelectedVendor(selected.id)
+      }
+    }
+  }, [selectedEvent])
 
   const checkUser = async () => {
     try {
@@ -173,6 +186,58 @@ function ExistingEvents({ onNavigate }) {
     setAiRecommendation('')
   }
 
+  const handlePickVendor = (quote) => {
+    setVendorToConfirm(quote)
+    setConfirmModalOpen(true)
+  }
+
+  const confirmVendorSelection = async () => {
+    try {
+      // Update DynamoDB - set selected to true for this vendor
+      await updateVendorSelection(user.signInDetails.loginId, vendorToConfirm.id, true)
+      
+      // If there was a previously selected vendor, unselect it
+      if (selectedVendor) {
+        const previousVendor = selectedEvent.quotes.find(q => q.id === selectedVendor)
+        if (previousVendor) {
+          await updateVendorSelection(user.signInDetails.loginId, previousVendor.id, false)
+        }
+      }
+      
+      setSelectedVendor(vendorToConfirm.id)
+      setConfirmModalOpen(false)
+      setVendorToConfirm(null)
+      
+      // Refresh events to get updated data
+      await fetchEvents()
+    } catch (error) {
+      console.error('Failed to update vendor selection:', error)
+      alert('Failed to select vendor. Please try again.')
+    }
+  }
+
+  const cancelVendorSelection = () => {
+    setConfirmModalOpen(false)
+    setVendorToConfirm(null)
+  }
+
+  const handleUnselectVendor = async () => {
+    if (!selectedVendor) return
+    
+    try {
+      // Update DynamoDB - set selected to false
+      await updateVendorSelection(user.signInDetails.loginId, selectedVendor, false)
+      
+      setSelectedVendor(null)
+      
+      // Refresh events to get updated data
+      await fetchEvents()
+    } catch (error) {
+      console.error('Failed to unselect vendor:', error)
+      alert('Failed to unselect vendor. Please try again.')
+    }
+  }
+
   if (selectedEvent) {
     const { needsAction, pending, done, rejected } = categorizeQuotes(selectedEvent.quotes || [])
     const services = getUniqueServices(selectedEvent.quotes || [])
@@ -229,7 +294,10 @@ function ExistingEvents({ onNavigate }) {
             </h2>
             <div className="kanban-cards">
               {needsAction.map(quote => (
-                <div key={quote.id} className="quote-card">
+                <div 
+                  key={quote.id} 
+                  className={`quote-card ${selectedVendor && selectedVendor !== quote.id ? 'greyed-out' : ''} ${selectedVendor === quote.id ? 'selected-vendor' : ''}`}
+                >
                   <h3>{quote.vendorName}</h3>
                   <p><strong>Service:</strong> {quote.serviceCategory}</p>
                   <p><strong>Price:</strong> ${quote.quotedPrice}</p>
@@ -247,12 +315,22 @@ function ExistingEvents({ onNavigate }) {
                   <p style={{ fontSize: '0.85rem', color: '#666', marginTop: '0.5rem' }}>
                     Contact: {quote.vendorEmail}
                   </p>
-                  <button 
-                    className="btn-reply"
-                    onClick={() => openReplyModal(quote)}
-                  >
-                    📧 Reply to Vendor
-                  </button>
+                  {!selectedVendor && (
+                    <button 
+                      className="btn-reply"
+                      onClick={() => openReplyModal(quote)}
+                    >
+                      📧 Reply to Vendor
+                    </button>
+                  )}
+                  {selectedVendor === quote.id && (
+                    <button 
+                      className="btn-reply"
+                      onClick={() => openReplyModal(quote)}
+                    >
+                      📧 Reply to Vendor
+                    </button>
+                  )}
                 </div>
               ))}
               {needsAction.length === 0 && (
@@ -267,7 +345,10 @@ function ExistingEvents({ onNavigate }) {
             </h2>
             <div className="kanban-cards">
               {pending.map(quote => (
-                <div key={quote.id} className="quote-card">
+                <div 
+                  key={quote.id} 
+                  className={`quote-card ${selectedVendor && selectedVendor !== quote.id ? 'greyed-out' : ''} ${selectedVendor === quote.id ? 'selected-vendor' : ''}`}
+                >
                   <h3>{quote.vendorName}</h3>
                   <p><strong>Service:</strong> {quote.serviceCategory}</p>
                   <p><strong>Price:</strong> ${quote.quotedPrice}</p>
@@ -324,7 +405,10 @@ function ExistingEvents({ onNavigate }) {
             </h2>
             <div className="kanban-cards">
               {done.map(quote => (
-                <div key={quote.id} className="quote-card">
+                <div 
+                  key={quote.id} 
+                  className={`quote-card ${selectedVendor && selectedVendor !== quote.id ? 'greyed-out' : ''} ${selectedVendor === quote.id ? 'selected-vendor' : ''}`}
+                >
                   <h3>{quote.vendorName}</h3>
                   <p><strong>Service:</strong> {quote.serviceCategory}</p>
                   <p><strong>Price:</strong> ${quote.quotedPrice}</p>
@@ -342,6 +426,30 @@ function ExistingEvents({ onNavigate }) {
                   <p style={{ fontSize: '0.85rem', color: '#666', marginTop: '0.5rem' }}>
                     Contact: {quote.vendorEmail}
                   </p>
+                  {!selectedVendor && (
+                    <button 
+                      className="btn-pick-vendor"
+                      onClick={() => handlePickVendor(quote)}
+                    >
+                      ✓ Pick this vendor
+                    </button>
+                  )}
+                  {selectedVendor === quote.id && (
+                    <>
+                      <button 
+                        className="btn-reply"
+                        onClick={() => openReplyModal(quote)}
+                      >
+                        📧 Reply to Vendor
+                      </button>
+                      <button 
+                        className="btn-unselect"
+                        onClick={handleUnselectVendor}
+                      >
+                        ✕ Unselect Vendor
+                      </button>
+                    </>
+                  )}
                 </div>
               ))}
               {done.length === 0 && (
@@ -356,7 +464,10 @@ function ExistingEvents({ onNavigate }) {
             </h2>
             <div className="kanban-cards">
               {rejected.map(quote => (
-                <div key={quote.id} className="quote-card">
+                <div 
+                  key={quote.id} 
+                  className={`quote-card ${selectedVendor && selectedVendor !== quote.id ? 'greyed-out' : ''} ${selectedVendor === quote.id ? 'selected-vendor' : ''}`}
+                >
                   <h3>{quote.vendorName}</h3>
                   <p><strong>Service:</strong> {quote.serviceCategory}</p>
                   <p><strong>Price:</strong> ${quote.quotedPrice}</p>
@@ -382,6 +493,38 @@ function ExistingEvents({ onNavigate }) {
             </div>
           </div>
         </div>
+
+        {confirmModalOpen && vendorToConfirm && (
+          <div className="modal-overlay" onClick={cancelVendorSelection}>
+            <div className="modal-content confirm-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h2>Confirm Vendor Selection</h2>
+                <button className="modal-close" onClick={cancelVendorSelection}>✕</button>
+              </div>
+              <div className="modal-body">
+                <p style={{ fontSize: '16px', marginBottom: '1rem' }}>
+                  Are you sure you want to select <strong>{vendorToConfirm.vendorName}</strong> as your vendor?
+                </p>
+                <div style={{ background: '#f8f9fa', padding: '1rem', borderRadius: '8px', marginBottom: '1rem' }}>
+                  <p><strong>Service:</strong> {vendorToConfirm.serviceCategory}</p>
+                  <p><strong>Price:</strong> ${vendorToConfirm.quotedPrice}</p>
+                  <p><strong>Quality Score:</strong> {vendorToConfirm.qualityScore}/10</p>
+                </div>
+                <p style={{ fontSize: '14px', color: '#666' }}>
+                  This will grey out all other vendors and allow you to proceed with this selection.
+                </p>
+              </div>
+              <div className="modal-footer">
+                <button className="btn-cancel" onClick={cancelVendorSelection}>
+                  Cancel
+                </button>
+                <button className="btn-confirm" onClick={confirmVendorSelection}>
+                  Confirm Selection
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {aiRecommendationModalOpen && (
           <div className="modal-overlay" onClick={closeAiRecommendationModal}>

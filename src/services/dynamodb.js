@@ -1,5 +1,5 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
-import { DynamoDBDocumentClient, PutCommand, QueryCommand } from '@aws-sdk/lib-dynamodb'
+import { DynamoDBDocumentClient, PutCommand, QueryCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb'
 import { fetchAuthSession } from 'aws-amplify/auth'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -126,6 +126,7 @@ export const getEventsByUserId = async (userId) => {
           startDate: item.start_date,
           lastReceivedDate: item.last_received_date,
           latestReply: item.latest_reply,
+          selected: item.selected || false,
           criteria: typeof item.criteria === 'string' ? JSON.parse(item.criteria) : item.criteria
         })
       } else {
@@ -152,6 +153,41 @@ export const getEventsByUserId = async (userId) => {
     return { success: true, events }
   } catch (error) {
     console.error('Error fetching events from DynamoDB:', error)
+    throw error
+  }
+}
+
+export const updateVendorSelection = async (clientId, eventIdVendorId, selected) => {
+  try {
+    // Get credentials from Amplify auth session
+    const session = await fetchAuthSession()
+    
+    // Update client with credentials
+    const authenticatedClient = new DynamoDBClient({
+      region: REGION,
+      credentials: session.credentials
+    })
+    const authenticatedDocClient = DynamoDBDocumentClient.from(authenticatedClient)
+
+    const { UpdateCommand } = await import('@aws-sdk/lib-dynamodb')
+
+    const command = new UpdateCommand({
+      TableName: TABLE_NAME,
+      Key: {
+        client_id: clientId,
+        event_id_vendor_id: eventIdVendorId
+      },
+      UpdateExpression: 'SET selected = :selected',
+      ExpressionAttributeValues: {
+        ':selected': selected
+      }
+    })
+
+    await authenticatedDocClient.send(command)
+
+    return { success: true }
+  } catch (error) {
+    console.error('Error updating vendor selection:', error)
     throw error
   }
 }
