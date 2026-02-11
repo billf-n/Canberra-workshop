@@ -562,6 +562,13 @@ button:active {
     margin-top: var(--spacing-md);
 }
 
+.event-date-subtitle {
+    color: var(--text-medium);
+    font-size: 16px;
+    margin-top: var(--spacing-xs);
+    font-weight: 500;
+}
+
 .events-list {
     display: flex;
     flex-direction: column;
@@ -584,13 +591,21 @@ button:active {
 .event-card-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     margin-bottom: var(--spacing-sm);
 }
 
 .event-card-header h3 {
     color: var(--text-dark);
     font-size: 20px;
+    margin-bottom: 4px;
+}
+
+.event-card-date {
+    color: var(--text-medium);
+    font-size: 14px;
+    font-weight: 500;
+    margin: 0;
 }
 
 .event-status {
@@ -890,4 +905,357 @@ button:active {
         font-size: 24px;
     }
 
+}
+
+/* Kanban Board Styles */
+.service-filter {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-lg);
+    flex-wrap: wrap;
+}
+
+.service-filter-btn {
+    padding: 10px 20px;
+    background: var(--white);
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    color: var(--text-dark);
+}
+
+.service-filter-btn:hover {
+    border-color: var(--primary-color);
+    background: var(--bg-hover);
+    transform: translateY(-1px);
+}
+
+.service-filter-btn.active {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: var(--white);
+    border-color: var(--primary-color);
+}
+
+.kanban-board {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+}
+
+.kanban-column {
+    background: var(--bg-light);
+    border-radius: var(--border-radius-md);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.kanban-header {
+    padding: var(--spacing-md);
+    font-size: 16px;
+    font-weight: 600;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.kanban-cards {
+    padding: var(--spacing-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    flex: 1;
+    overflow-y: auto;
+    max-height: 70vh;
+}
+
+.quote-card {
+    background: var(--white);
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    padding: var(--spacing-md);
+    transition: all var(--transition-fast);
+}
+
+.quote-card:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.quote-card h3 {
+    color: var(--text-dark);
+    font-size: 18px;
+    margin-bottom: var(--spacing-sm);
+}
+
+.quote-card p {
+    color: var(--text-medium);
+    font-size: 14px;
+    margin-bottom: var(--spacing-xs);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.quote-card details {
+    margin-top: var(--spacing-sm);
+    cursor: pointer;
+}
+
+.quote-card summary {
+    color: var(--primary-color);
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.quote-card summary:hover {
+    color: var(--secondary-color);
+}
+
+.event-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    background: var(--primary-color);
+    color: var(--white);
+}
+
+@media (max-width: 1024px) {
+    .kanban-board {
+        grid-template-columns: 1fr;
+    }
+    
+    .kanban-cards {
+        max-height: 50vh;
+    }
+}
+
+@media (max-width: 768px) {
+    .existing-events-container {
+        padding: var(--spacing-md);
+    }
+    
+    .events-title {
+        font-size: 24px;
+    }
+}
+
+/* Reply Button */
+.btn-reply {
+    width: 100%;
+    margin-top: var(--spacing-sm);
+    padding: 10px 16px;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: var(--white);
+    border: none;
+    border-radius: var(--border-radius-sm);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.btn-reply:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(212, 165, 116, 0.4);
+}
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: var(--spacing-md);
+}
+
+.modal-content {
+    background: var(--white);
+    border-radius: var(--border-radius-lg);
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-lg);
+    border-bottom: 2px solid var(--border-color);
+}
+
+.modal-header h2 {
+    color: var(--text-dark);
+    font-size: 24px;
+    margin: 0;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 28px;
+    color: var(--text-medium);
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all var(--transition-fast);
+}
+
+.modal-close:hover {
+    background: var(--bg-light);
+    color: var(--text-dark);
+    transform: none;
+}
+
+.modal-body {
+    padding: var(--spacing-lg);
+}
+
+.latest-reply-section {
+    margin-bottom: var(--spacing-lg);
+    padding: var(--spacing-md);
+    background: var(--bg-light);
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+}
+
+.latest-reply-section h3 {
+    color: var(--text-dark);
+    font-size: 16px;
+    margin-bottom: var(--spacing-sm);
+}
+
+.latest-reply-content {
+    max-height: 300px;
+    overflow-y: auto;
+    padding: var(--spacing-sm);
+    background: var(--white);
+    border-radius: var(--border-radius-sm);
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-medium);
+}
+
+.latest-reply-content p {
+    margin-bottom: var(--spacing-xs);
+}
+
+.latest-reply-content ul {
+    margin-left: var(--spacing-md);
+    margin-bottom: var(--spacing-xs);
+}
+
+.latest-reply-content blockquote {
+    border-left: 3px solid var(--border-color);
+    padding-left: var(--spacing-sm);
+    margin: var(--spacing-sm) 0;
+    color: var(--text-light);
+}
+
+.modal-body .form-group {
+    margin-bottom: var(--spacing-md);
+}
+
+.modal-body .form-group label {
+    display: block;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: var(--spacing-xs);
+    font-size: 14px;
+}
+
+.modal-body .form-group input,
+.modal-body .form-group textarea {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--text-dark);
+    margin-bottom: 0;
+}
+
+.modal-body .form-group input:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-lg);
+    border-top: 2px solid var(--border-color);
+}
+
+.btn-cancel {
+    padding: 12px 24px;
+    background: var(--bg-light);
+    color: var(--text-medium);
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.btn-cancel:hover {
+    background: var(--border-color);
+    transform: none;
+}
+
+.btn-send {
+    padding: 12px 24px;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: var(--white);
+    border: none;
+    border-radius: var(--border-radius-sm);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.btn-send:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-send:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+    .modal-content {
+        max-height: 95vh;
+    }
+    
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+        padding: var(--spacing-md);
+    }
 }

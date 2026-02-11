@@ -6,6 +6,8 @@ import SignIn from './components/Auth/SignIn'
 import SignUp from './components/Auth/SignUp'
 import EventForm from './components/EventForm'
 import ExistingEvents from './components/ExistingEvents'
+import LoadingPage from './components/LoadingPage'
+
 
 function App() {
   const [user, setUser] = useState(null)

@@ -17,6 +17,7 @@ const TOTAL_STEPS = 7
 function EventForm({ onNavigate, onEventSubmit, user }) {
   const [currentStep, setCurrentStep] = useState(1)
   const [submitError, setSubmitError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
   const navigate = useNavigate()
   const [formData, setFormData] = useState({
     eventType: '',
@@ -41,56 +42,47 @@ function EventForm({ onNavigate, onEventSubmit, user }) {
   }
 
   const nextStep = () => {
-    if (currentStep < TOTAL_STEPS) {
-      setCurrentStep(prev => prev + 1)
-    }
+    if (currentStep < TOTAL_STEPS) setCurrentStep(prev => prev + 1)
   }
 
   const prevStep = () => {
-    if (currentStep > 1) {
-      setCurrentStep(prev => prev - 1)
-    }
+    if (currentStep > 1) setCurrentStep(prev => prev - 1)
   }
 
+  // 🔹 Handle final submit directly to n8n
   const handleFinalSubmit = async () => {
-    if (!user) {
-      navigate('/signin', { state: { from: '/new-event' } })
-      return
-    }
+    setSubmitting(true)
+    setSubmitError('')
 
     try {
-      // Get user attributes
-      const attributes = await fetchUserAttributes()
-      const userId = attributes.sub
-      const userEmail = attributes.email
-      const userName = attributes.name || ''
-
-      const eventWithUser = {
-        ...formData,
-        userId,
-        userEmail,
-        userName
+      if (!user) {
+        navigate('/signin', { state: { from: '/new-event' } })
+        return
       }
 
-      console.log('Saving event to DynamoDB:', eventWithUser)
+      const response = await fetch('https://selinaaaaa.app.n8n.cloud/webhook-test/d6866489-aad7-4cd0-9f11-d04af7edffad', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      })
 
-      // Save to DynamoDB
-      const result = await saveEventToDatabase(formData, userId)
-
-      console.log('Event saved successfully to DynamoDB:', result)
-
-      if (onEventSubmit) {
-        await onEventSubmit({ ...eventWithUser, eventId: result.eventId })
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
       }
 
-      alert(`Thank you! Your event has been created successfully. Event ID: ${result.eventId}`)
+      await response.json().catch(() => { })
+      console.log('Event submitted successfully, agent analyzing...')
+      setCurrentView('loading')
+      await new Promise(resolve => setTimeout(resolve, 5000))
 
-      // Reset form and navigate back to landing
+
+      // Reset form
       setFormData({
         eventType: '',
         eventTypeDetails: '',
         eventDate: '',
         guests: '',
+        guestEstimate: '',
         budget: '',
         eventLocation: '',
         services: [],
@@ -100,9 +92,11 @@ function EventForm({ onNavigate, onEventSubmit, user }) {
       setSubmitError('')
       onNavigate('')
     } catch (error) {
-      console.error('Error saving event:', error)
-      setSubmitError(`Failed to save event: ${error.message}`)
-      alert(`There was an error saving your event: ${error.message}. Please try again.`)
+      console.error('Submission error:', error)
+      setSubmitError(`Failed to submit event: ${error.message}`)
+      alert(`There was an error submitting your event: ${error.message}`)
+    } finally {
+      setSubmitting(false)
     }
   }
 
