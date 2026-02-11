@@ -91,7 +91,7 @@ function EventForm({ onNavigate, onEventSubmit, user }) {
     console.log('Final payload being sent to n8n:', eventPayload)
 
     const response = await fetch(
-      'https://selinaaaaa.app.n8n.cloud/webhook-test/d6866489-aad7-4cd0-9f11-d04af7edffad',
+      'https://selinaaaaa.app.n8n.cloud/webhook/d6866489-aad7-4cd0-9f11-d04af7edffad',
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
