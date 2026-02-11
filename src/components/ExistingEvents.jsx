@@ -178,7 +178,7 @@ function ExistingEvents({ onNavigate }) {
     const services = getUniqueServices(selectedEvent.quotes || [])
 
     return (
-      <div className="existing-events-container">
+      <div className="existing-events-container kanban-view">
         <div className="events-header">
           <button className="btn-back-home" onClick={() => {
             setSelectedEvent(null)
@@ -294,7 +294,7 @@ function ExistingEvents({ onNavigate }) {
           </div>
 
           <div className="kanban-column done">
-            <h2 className="kanban-header" style={{ backgroundColor: '#28a745', color: 'white', padding: '1rem', margin: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h2 className="kanban-header" style={{ backgroundColor: '#28a745', color: 'white', padding: '1rem', margin: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
               <span>DONE ({done.length})</span>
               {done.length > 0 && (
                 <button 
@@ -302,6 +302,7 @@ function ExistingEvents({ onNavigate }) {
                   onClick={() => getAiRecommendation(done)}
                   title="Get AI-powered recommendation to help you choose the best option"
                   disabled
+                  style={{ position: 'absolute', right: '1rem' }}
                 >
                   <svg 
                     className="ai-sparkle"

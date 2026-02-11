@@ -550,6 +550,13 @@ button:active {
     background: var(--white);
     border-radius: var(--border-radius-lg);
     box-shadow: var(--shadow-lg);
+    margin: 0 auto;
+}
+
+.existing-events-container.kanban-view {
+    max-width: 95%;
+    min-height: 100vh;
+    margin: 200px;
 }
 
 .events-header {
@@ -942,8 +949,9 @@ button:active {
 .kanban-board {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: var(--spacing-md);
+    gap: var(--spacing-lg);
     margin-top: var(--spacing-lg);
+    height: calc(100vh - 450px);
 }
 
 .kanban-column {
@@ -970,7 +978,7 @@ button:active {
     gap: var(--spacing-md);
     flex: 1;
     overflow-y: auto;
-    max-height: 70vh;
+    max-height: 100%;
 }
 
 .quote-card {
