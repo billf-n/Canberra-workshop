@@ -1,2 +1,4 @@
 node_modules
 .env
+DYNAMODB_SETUP.md
+SETUP_DYNAMODB.md

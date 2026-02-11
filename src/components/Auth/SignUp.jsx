@@ -71,7 +71,7 @@ function SignUp({ onSuccess, onSwitchToSignIn }) {
     return (
       <div className="auth-form-container">
         <div className="auth-form-card">
-          <h1 className="auth-title">Verify Your Email</h1>
+          <h1 className="auth-title">Verify Your Email</h1>n
           <p className="auth-subtitle">
             We sent a verification code to {email}
           </p>

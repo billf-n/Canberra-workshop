@@ -4,15 +4,16 @@ import StepCounter from './StepCounter'
 import EventTypeStep from './steps/EventTypeStep'
 import EventDateStep from './steps/EventDateStep'
 import GuestCountStep from './steps/GuestCountStep'
+import BudgetStep from './steps/BudgetStep'
+import EventLocationStep from './steps/EventLocationStep'
 import ServicesStep from './steps/ServicesStep'
 import AdditionalInfoStep from './steps/AdditionalInfoStep'
-import NameStep from './steps/NameStep'
-import EmailStep from './steps/EmailStep'
-import PhoneStep from './steps/PhoneStep'
+import AuthStep from './steps/AuthStep'
+import { saveEventToDatabase } from '../services/dynamodb'
 
-const TOTAL_STEPS = 8
+const TOTAL_STEPS = 7
 
-function EventForm({ onNavigate }) {
+function EventForm({ onNavigate, onEventSubmit }) {
   const [currentStep, setCurrentStep] = useState(1)
   const [submitError, setSubmitError] = useState('')
   const [formData, setFormData] = useState({
@@ -20,11 +21,11 @@ function EventForm({ onNavigate }) {
     eventTypeDetails: '',
     eventDate: '',
     guests: '',
+    guestEstimate: '',
+    budget: '',
+    eventLocation: '',
     services: [],
-    additionalInfo: '',
-    name: '',
-    email: '',
-    phone: ''
+    additionalInfo: ''
   })
 
   const updateFormData = (field, value) => {
@@ -43,37 +44,93 @@ function EventForm({ onNavigate }) {
     }
   }
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
+  const [authenticatedUser, setAuthenticatedUser] = useState(null)
 
-    if (formData.services.length === 0) {
-      setSubmitError('Please select at least one service')
-      setCurrentStep(4)
-      return
+  const handleAuthSuccess = async (user) => {
+    try {
+      // Get user ID and email from Cognito user object
+      const userId = user.userId || user.username
+
+      // Fetch user attributes to get email
+      const { fetchUserAttributes } = await import('aws-amplify/auth')
+      const attributes = await fetchUserAttributes()
+      const userEmail = attributes.email
+      const userName = attributes.name || ''
+
+      console.log('User authenticated:', { userId, userEmail, userName })
+
+      // Store authenticated user
+      setAuthenticatedUser({
+        userId,
+        email: userEmail,
+        name: userName,
+        attributes
+      })
+
+      // Automatically submit the event
+      await handleFinalSubmit({
+        userId,
+        email: userEmail,
+        name: userName
+      })
+    } catch (error) {
+      console.error('Error getting user attributes:', error)
+      alert('There was an error processing your authentication. Please try again.')
     }
+  }
 
-    console.log('Form submitted:', formData)
-    alert('Thank you! Your event services request has been submitted.')
+  const handleFinalSubmit = async (userData) => {
+    try {
+      // User is authenticated, save event to DynamoDB
+      const eventWithUser = {
+        ...formData,
+        userId: userData.userId,
+        userEmail: userData.email,
+        userName: userData.name
+      }
+      
+      console.log('Saving event to DynamoDB:', eventWithUser)
+      
+      // Save to DynamoDB
+      const result = await saveEventToDatabase(formData, userData.userId)
+      
+      console.log('Event saved successfully to DynamoDB:', result)
 
-    // Reset form and navigate back to landing
-    setFormData({
-      eventType: '',
-      eventTypeDetails: '',
-      eventDate: '',
-      guests: '',
-      services: [],
-      additionalInfo: '',
-      name: '',
-      email: '',
-      phone: ''
-    })
-    setCurrentStep(1)
-    setSubmitError('')
-    onNavigate('landing')
+      if (onEventSubmit) {
+        await onEventSubmit({ ...eventWithUser, eventId: result.eventId })
+      }
+
+      alert(`Thank you! Your event has been created successfully. Event ID: ${result.eventId}`)
+
+      // Reset form and navigate back to landing
+      setFormData({
+        eventType: '',
+        eventTypeDetails: '',
+        eventDate: '',
+        guests: '',
+        services: [],
+        additionalInfo: ''
+      })
+      setCurrentStep(1)
+      setSubmitError('')
+      setAuthenticatedUser(null)
+      onNavigate('landing')
+    } catch (error) {
+      console.error('Error saving event:', error)
+      setSubmitError(`Failed to save event: ${error.message}`)
+      alert(`There was an error saving your event: ${error.message}. Please try again.`)
+    }
   }
 
   const renderStep = () => {
     switch (currentStep) {
+      case 0:
+        return (
+          <AuthStep
+            onSuccess={handleAuthSuccess}
+            nextStep={nextStep}
+          />
+        )
       case 1:
         return (
           <EventTypeStep
@@ -81,6 +138,8 @@ function EventForm({ onNavigate }) {
             eventTypeDetails={formData.eventTypeDetails}
             updateFormData={updateFormData}
             nextStep={nextStep}
+            prevStep={prevStep}
+            isFirstStep={true}
           />
         )
       case 2:
@@ -96,12 +155,31 @@ function EventForm({ onNavigate }) {
         return (
           <GuestCountStep
             guests={formData.guests}
+            guestEstimate={formData.guestEstimate}
             updateFormData={updateFormData}
             nextStep={nextStep}
             prevStep={prevStep}
           />
         )
       case 4:
+        return (
+          <BudgetStep
+            budget={formData.budget}
+            updateFormData={updateFormData}
+            nextStep={nextStep}
+            prevStep={prevStep}
+          />
+        )
+      case 5:
+        return (
+          <EventLocationStep
+            eventLocation={formData.eventLocation}
+            updateFormData={updateFormData}
+            nextStep={nextStep}
+            prevStep={prevStep}
+          />
+        )
+      case 6:
         return (
           <ServicesStep
             services={formData.services}
@@ -112,39 +190,12 @@ function EventForm({ onNavigate }) {
             setError={setSubmitError}
           />
         )
-      case 5:
+      case 7:
         return (
           <AdditionalInfoStep
             additionalInfo={formData.additionalInfo}
             updateFormData={updateFormData}
-            nextStep={nextStep}
-            prevStep={prevStep}
-          />
-        )
-      case 6:
-        return (
-          <NameStep
-            name={formData.name}
-            updateFormData={updateFormData}
-            nextStep={nextStep}
-            prevStep={prevStep}
-          />
-        )
-      case 7:
-        return (
-          <EmailStep
-            email={formData.email}
-            updateFormData={updateFormData}
-            nextStep={nextStep}
-            prevStep={prevStep}
-          />
-        )
-      case 8:
-        return (
-          <PhoneStep
-            phone={formData.phone}
-            updateFormData={updateFormData}
-            handleSubmit={handleSubmit}
+            nextStep={handleFinalSubmit}
             prevStep={prevStep}
           />
         )
@@ -162,7 +213,7 @@ function EventForm({ onNavigate }) {
         </button>
         <StepCounter currentStep={currentStep} totalSteps={TOTAL_STEPS} />
       </div>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={(e) => e.preventDefault()}>
         {renderStep()}
       </form>
     </div>
