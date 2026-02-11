@@ -64,19 +64,19 @@ function EventForm({ onNavigate, onEventSubmit, user }) {
       const userId = attributes.sub
       const userEmail = attributes.email
       const userName = attributes.name || ''
-      
+
       const eventWithUser = {
         ...formData,
         userId,
         userEmail,
         userName
       }
-      
+
       console.log('Saving event to DynamoDB:', eventWithUser)
-      
+
       // Save to DynamoDB
       const result = await saveEventToDatabase(formData, userId)
-      
+
       console.log('Event saved successfully to DynamoDB:', result)
 
       if (onEventSubmit) {
@@ -184,8 +184,6 @@ function EventForm({ onNavigate, onEventSubmit, user }) {
 
   return (
     <div className="container">
-      <input name="userId" style="display: none">{user.userId}</input>
-      <input name="userEmail" style="display: none">{user.signInDetails.loginId}</input>
       <ProgressBar currentStep={currentStep} totalSteps={TOTAL_STEPS} />
       <div className="form-header">
         <button className="btn-back-home" onClick={() => onNavigate('')}>
@@ -194,6 +192,8 @@ function EventForm({ onNavigate, onEventSubmit, user }) {
         <StepCounter currentStep={currentStep} totalSteps={TOTAL_STEPS} />
       </div>
       <form onSubmit={(e) => e.preventDefault()}>
+        <input name="userId" className="form-hidden-input" value={user.userId}></input>
+        <input name="userEmail" className="form-hidden-input" value={user.signInDetails.loginId}></input>
         {renderStep()}
       </form>
     </div>
