@@ -2,28 +2,24 @@ import { useState } from 'react'
 import LandingPage from './components/LandingPage'
 import EventForm from './components/EventForm'
 import ExistingEvents from './components/ExistingEvents'
+import LoadingPage from './components/LoadingPage'
+
 
 function App() {
   const [currentView, setCurrentView] = useState('landing')
 
-  const handleNavigate = (view) => {
-    setCurrentView(view)
-  }
-
-  const handleEventSubmit = (eventData) => {
-    
-  }
+  const handleNavigate = (view) => setCurrentView(view)
 
   return (
     <>
       {currentView === 'landing' && <LandingPage onNavigate={handleNavigate} />}
       {currentView === 'new-event' && (
-        <EventForm 
-          onNavigate={handleNavigate}
-          onEventSubmit={handleEventSubmit}
-        />
+        <EventForm onNavigate={handleNavigate} setCurrentView={setCurrentView} />
       )}
-      {currentView === 'existing-events' && <ExistingEvents onNavigate={handleNavigate} />}
+      {currentView === 'loading' && <LoadingPage onNavigate={handleNavigate}/>}
+      {currentView === 'existing-events' && (
+        <ExistingEvents onNavigate={handleNavigate} />
+      )}
     </>
   )
 }

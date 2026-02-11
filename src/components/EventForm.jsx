@@ -8,14 +8,13 @@ import BudgetStep from './steps/BudgetStep'
 import EventLocationStep from './steps/EventLocationStep'
 import ServicesStep from './steps/ServicesStep'
 import AdditionalInfoStep from './steps/AdditionalInfoStep'
-import AuthStep from './steps/AuthStep'
-import { saveEventToDatabase } from '../services/dynamodb'
 
 const TOTAL_STEPS = 7
 
-function EventForm({ onNavigate, onEventSubmit }) {
+function EventForm({ onNavigate, onEventSubmit, setCurrentView }) {
   const [currentStep, setCurrentStep] = useState(1)
   const [submitError, setSubmitError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
   const [formData, setFormData] = useState({
     eventType: '',
     eventTypeDetails: '',
@@ -33,104 +32,61 @@ function EventForm({ onNavigate, onEventSubmit }) {
   }
 
   const nextStep = () => {
-    if (currentStep < TOTAL_STEPS) {
-      setCurrentStep(prev => prev + 1)
-    }
+    if (currentStep < TOTAL_STEPS) setCurrentStep(prev => prev + 1)
   }
 
   const prevStep = () => {
-    if (currentStep > 1) {
-      setCurrentStep(prev => prev - 1)
-    }
+    if (currentStep > 1) setCurrentStep(prev => prev - 1)
   }
 
-  const [authenticatedUser, setAuthenticatedUser] = useState(null)
+  // 🔹 Handle final submit directly to n8n
+  const handleFinalSubmit = async () => {
+    setSubmitting(true)
+    setSubmitError('')
 
-  const handleAuthSuccess = async (user) => {
     try {
-      // Get user ID and email from Cognito user object
-      const userId = user.userId || user.username
 
-      // Fetch user attributes to get email
-      const { fetchUserAttributes } = await import('aws-amplify/auth')
-      const attributes = await fetchUserAttributes()
-      const userEmail = attributes.email
-      const userName = attributes.name || ''
-
-      console.log('User authenticated:', { userId, userEmail, userName })
-
-      // Store authenticated user
-      setAuthenticatedUser({
-        userId,
-        email: userEmail,
-        name: userName,
-        attributes
+      const response = await fetch('https://selinaaaaa.app.n8n.cloud/webhook-test/d6866489-aad7-4cd0-9f11-d04af7edffad', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
       })
 
-      // Automatically submit the event
-      await handleFinalSubmit({
-        userId,
-        email: userEmail,
-        name: userName
-      })
-    } catch (error) {
-      console.error('Error getting user attributes:', error)
-      alert('There was an error processing your authentication. Please try again.')
-    }
-  }
-
-  const handleFinalSubmit = async (userData) => {
-    try {
-      // User is authenticated, save event to DynamoDB
-      const eventWithUser = {
-        ...formData,
-        userId: userData.userId,
-        userEmail: userData.email,
-        userName: userData.name
-      }
-      
-      console.log('Saving event to DynamoDB:', eventWithUser)
-      
-      // Save to DynamoDB
-      const result = await saveEventToDatabase(formData, userData.userId)
-      
-      console.log('Event saved successfully to DynamoDB:', result)
-
-      if (onEventSubmit) {
-        await onEventSubmit({ ...eventWithUser, eventId: result.eventId })
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
       }
 
-      alert(`Thank you! Your event has been created successfully. Event ID: ${result.eventId}`)
+      await response.json().catch(() => {})
+      console.log('Event submitted successfully, agent analyzing...')
+      setCurrentView('loading')
+      await new Promise(resolve => setTimeout(resolve, 5000))
 
-      // Reset form and navigate back to landing
+
+      // Reset form
       setFormData({
         eventType: '',
         eventTypeDetails: '',
         eventDate: '',
         guests: '',
+        guestEstimate: '',
+        budget: '',
+        eventLocation: '',
         services: [],
         additionalInfo: ''
       })
       setCurrentStep(1)
-      setSubmitError('')
-      setAuthenticatedUser(null)
       onNavigate('landing')
     } catch (error) {
-      console.error('Error saving event:', error)
-      setSubmitError(`Failed to save event: ${error.message}`)
-      alert(`There was an error saving your event: ${error.message}. Please try again.`)
+      console.error('Submission error:', error)
+      setSubmitError(`Failed to submit event: ${error.message}`)
+      alert(`There was an error submitting your event: ${error.message}`)
+    } finally {
+      setSubmitting(false)
     }
   }
 
   const renderStep = () => {
     switch (currentStep) {
-      case 0:
-        return (
-          <AuthStep
-            onSuccess={handleAuthSuccess}
-            nextStep={nextStep}
-          />
-        )
       case 1:
         return (
           <EventTypeStep
@@ -195,7 +151,7 @@ function EventForm({ onNavigate, onEventSubmit }) {
           <AdditionalInfoStep
             additionalInfo={formData.additionalInfo}
             updateFormData={updateFormData}
-            nextStep={handleFinalSubmit}
+            nextStep={handleFinalSubmit} 
             prevStep={prevStep}
           />
         )
