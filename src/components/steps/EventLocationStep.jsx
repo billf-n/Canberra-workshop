@@ -24,7 +24,7 @@ function EventLocationStep({ eventLocation, updateFormData, nextStep, prevStep }
           type="text"
           value={location}
           onChange={handleLocationChange}
-          placeholder="Enter city, venue, or address"
+          placeholder="Enter a suburb, eg: Griffith, ACT, 2603"
           style={{ width: '100%', padding: '12px', fontSize: '16px' }}
         />
       </div>

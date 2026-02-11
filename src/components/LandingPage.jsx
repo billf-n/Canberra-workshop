@@ -1,8 +1,26 @@
-import { signOut } from 'aws-amplify/auth'
+import { useState, useEffect } from 'react'
+import { signOut, fetchUserAttributes } from 'aws-amplify/auth'
 import { useNavigate } from 'react-router-dom'
 
 function LandingPage({ onNavigate, user, onSignOut }) {
   const navigate = useNavigate()
+  const [userName, setUserName] = useState('')
+
+  useEffect(() => {
+    if (user) {
+      getUserAttributes()
+    }
+  }, [user])
+
+  const getUserAttributes = async () => {
+    try {
+      const attributes = await fetchUserAttributes()
+      setUserName(attributes.name.split(" ")[0] || attributes.email?.split('@')[0] || '')
+    } catch (error) {
+      console.error('Error fetching user attributes:', error)
+      setUserName(user?.signInDetails?.loginId?.split('@')[0] || '')
+    }
+  }
 
   const handleSignOut = async () => {
     try {
@@ -36,12 +54,12 @@ function LandingPage({ onNavigate, user, onSignOut }) {
           Sign Out
         </button>
       )}
-      
+
       <div className="hero-section">
         <h1 className="hero-title">Event Planning Made Simple</h1>
         <p className="hero-subtitle">Plan your perfect event with ease</p>
         {user && (
-          <p className="hero-welcome">Welcome back, {user.signInDetails.loginId.split("@")[0]}!</p>
+          <p className="hero-welcome">Welcome back, {userName}!</p>
         )}
       </div>
 

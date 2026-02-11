@@ -4,11 +4,11 @@ function BudgetStep({ budget, updateFormData, nextStep, prevStep }) {
   const [budgetRange, setBudgetRange] = useState(budget || '')
 
   const budgetRanges = [
-    { value: 'under-5k', label: 'Under $5,000', icon: '💵' },
-    { value: '5k-10k', label: '$5,000 - $10,000', icon: '💰' },
-    { value: '10k-25k', label: '$10,000 - $25,000', icon: '💸' },
-    { value: '25k-50k', label: '$25,000 - $50,000', icon: '💎' },
-    { value: '50k+', label: '$50,000+', icon: '🏆' }
+    { value: '<500', label: 'Under $500', icon: '💵' },
+    { value: '500-1000', label: '$500 - $1,000', icon: '💸' },
+    { value: '1000-5000', label: '$1,000 - $5,000', icon: '💎' },
+    { value: '5000-20000', label: '$5,000 - $20,000', icon: '🏆' },
+    { value: '>20000', label: '$20,000+', icon: '🏆' }
   ]
 
   const handleBudgetChange = (value) => {
@@ -37,7 +37,7 @@ function BudgetStep({ budget, updateFormData, nextStep, prevStep }) {
               onChange={() => handleBudgetChange(range.value)}
             />
             <span className="option-content">
-              <span className="option-icon">{range.icon}</span>
+              {/* <span className="option-icon">{range.icon}</span> */}
               <span className="option-text">{range.label}</span>
             </span>
           </label>
