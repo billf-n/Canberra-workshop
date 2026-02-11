@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { fetchUserAttributes } from 'aws-amplify/auth'
 import ProgressBar from './ProgressBar'
 import StepCounter from './StepCounter'
+import EventNameStep from './steps/EventNameStep'
 import EventTypeStep from './steps/EventTypeStep'
 import EventDateStep from './steps/EventDateStep'
 import GuestCountStep from './steps/GuestCountStep'
@@ -12,7 +13,7 @@ import ServicesStep from './steps/ServicesStep'
 import AdditionalInfoStep from './steps/AdditionalInfoStep'
 import { saveEventToDatabase } from '../services/dynamodb'
 
-const TOTAL_STEPS = 7
+const TOTAL_STEPS = 8
 
 function EventForm({ onNavigate, onEventSubmit, user }) {
   const [currentStep, setCurrentStep] = useState(1)
@@ -20,6 +21,7 @@ function EventForm({ onNavigate, onEventSubmit, user }) {
   const [submitting, setSubmitting] = useState(false)
   const navigate = useNavigate()
   const [formData, setFormData] = useState({
+    eventName: '',
     eventType: '',
     eventDate: '',
     guests: '',
@@ -64,6 +66,7 @@ function EventForm({ onNavigate, onEventSubmit, user }) {
 
     const eventPayload = {
       ...formData,
+      eventName: formData.eventName.replace(/[^\w\s]/g, '').replace(/\s+/g, '_'),
 
       // Prefer Cognito sub as stable unique ID
       userId:
@@ -118,13 +121,22 @@ function EventForm({ onNavigate, onEventSubmit, user }) {
     switch (currentStep) {
       case 1:
         return (
-          <EventTypeStep
-            eventType={formData.eventType}
+          <EventNameStep
+            eventName={formData.eventName}
             updateFormData={updateFormData}
             nextStep={nextStep}
           />
         )
       case 2:
+        return (
+          <EventTypeStep
+            eventType={formData.eventType}
+            updateFormData={updateFormData}
+            nextStep={nextStep}
+            prevStep={prevStep}
+          />
+        )
+      case 3:
         return (
           <EventDateStep
             eventDate={formData.eventDate}
@@ -133,7 +145,7 @@ function EventForm({ onNavigate, onEventSubmit, user }) {
             prevStep={prevStep}
           />
         )
-      case 3:
+      case 4:
         return (
           <GuestCountStep
             guests={formData.guests}
@@ -142,7 +154,7 @@ function EventForm({ onNavigate, onEventSubmit, user }) {
             prevStep={prevStep}
           />
         )
-      case 4:
+      case 5:
         return (
           <BudgetStep
             budget={formData.budget}
@@ -151,7 +163,7 @@ function EventForm({ onNavigate, onEventSubmit, user }) {
             prevStep={prevStep}
           />
         )
-      case 5:
+      case 6:
         return (
           <EventLocationStep
             eventLocation={formData.eventLocation}
@@ -160,7 +172,7 @@ function EventForm({ onNavigate, onEventSubmit, user }) {
             prevStep={prevStep}
           />
         )
-      case 6:
+      case 7:
         return (
           <ServicesStep
             services={formData.services}
@@ -171,7 +183,7 @@ function EventForm({ onNavigate, onEventSubmit, user }) {
             setError={setSubmitError}
           />
         )
-      case 7:
+      case 8:
         return (
           <AdditionalInfoStep
             additionalInfo={formData.additionalInfo}
