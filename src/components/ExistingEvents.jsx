@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react'
 import { getCurrentUser } from 'aws-amplify/auth'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { getEventsByUserId, updateVendorSelection } from '../services/dynamodb'
 
 function ExistingEvents({ onNavigate }) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [events, setEvents] = useState([])
   const [eventsLoading, setEventsLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -32,6 +33,17 @@ function ExistingEvents({ onNavigate }) {
       fetchEvents()
     }
   }, [user])
+
+  useEffect(() => {
+    // Restore selected event from URL parameter
+    const eventId = searchParams.get('event')
+    if (eventId && events.length > 0) {
+      const event = events.find(e => e.id === eventId)
+      if (event) {
+        setSelectedEvent(event)
+      }
+    }
+  }, [events, searchParams])
 
   useEffect(() => {
     // Find the selected vendor from the event quotes
@@ -248,6 +260,7 @@ function ExistingEvents({ onNavigate }) {
           <button className="btn-back-home" onClick={() => {
             setSelectedEvent(null)
             setSelectedService('all')
+            setSearchParams({}) // Clear URL parameters
           }}>
             ← Back to Events
           </button>
@@ -678,7 +691,10 @@ function ExistingEvents({ onNavigate }) {
               <div 
                 key={event.id} 
                 className="event-card" 
-                onClick={() => setSelectedEvent(event)}
+                onClick={() => {
+                  setSelectedEvent(event)
+                  setSearchParams({ event: event.id }) // Add event ID to URL
+                }}
                 style={{ cursor: 'pointer' }}
               >
                 <div className="event-card-header">
