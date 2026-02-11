@@ -116,8 +116,8 @@ function ExistingEvents({ onNavigate }) {
 
   const openReplyModal = (quote) => {
     setSelectedQuote(quote)
-    setEmailSubject(`Re: ${selectedEvent.name} - ${quote.serviceCategory}`)
-    setEmailBody(`Hi ${quote.vendorName},\n\nThank you for your quote regarding ${selectedEvent.name}.\n\n`)
+    setEmailSubject(`Re: ${selectedEvent.name.replace(/_/g, ' ')} - ${quote.serviceCategory}`)
+    setEmailBody(`Hi ${quote.vendorName},\n\nThank you for your quote regarding ${selectedEvent.name.replace(/_/g, ' ')}.\n\n`)
     setReplyModalOpen(true)
   }
 
@@ -160,7 +160,7 @@ function ExistingEvents({ onNavigate }) {
       await new Promise(resolve => setTimeout(resolve, 2000))
       
       // Mock recommendation
-      const mockRecommendation = `Based on the analysis of ${done.length} completed quotes for ${selectedEvent.name}:\n\n` +
+      const mockRecommendation = `Based on the analysis of ${done.length} completed quotes for ${selectedEvent.name.replace(/_/g, ' ')}:\n\n` +
         `🏆 Top Recommendation: ${done[0]?.vendorName || 'N/A'}\n\n` +
         `Reasons:\n` +
         `• Highest quality score: ${done[0]?.qualityScore || 'N/A'}/10\n` +
@@ -251,7 +251,7 @@ function ExistingEvents({ onNavigate }) {
           }}>
             ← Back to Events
           </button>
-          <h1 className="events-title">{selectedEvent.name}</h1>
+          <h1 className="events-title">{selectedEvent.name.replace(/_/g, ' ')}</h1>
           {selectedEvent.date && (
             <p className="event-date-subtitle">
               Event Date: {new Date(selectedEvent.date).toLocaleDateString('en-US', { 
@@ -683,7 +683,7 @@ function ExistingEvents({ onNavigate }) {
               >
                 <div className="event-card-header">
                   <div>
-                    <h3>{event.name}</h3>
+                    <h3>{event.name.replace(/_/g, ' ')}</h3>
                     {event.date && (
                       <p className="event-card-date">
                         {new Date(event.date).toLocaleDateString('en-US', { 
