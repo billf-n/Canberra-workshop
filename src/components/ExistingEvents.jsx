@@ -17,6 +17,9 @@ function ExistingEvents({ onNavigate }) {
   const [selectedQuote, setSelectedQuote] = useState(null)
   const [emailSubject, setEmailSubject] = useState('')
   const [emailBody, setEmailBody] = useState('')
+  const [aiRecommendationModalOpen, setAiRecommendationModalOpen] = useState(false)
+  const [aiRecommendation, setAiRecommendation] = useState('')
+  const [loadingRecommendation, setLoadingRecommendation] = useState(false)
 
   useEffect(() => {
     checkUser()
@@ -109,6 +112,64 @@ function ExistingEvents({ onNavigate }) {
     setSelectedQuote(null)
     setEmailSubject('')
     setEmailBody('')
+  }
+
+  const getAiRecommendation = async (doneQuotes) => {
+    setLoadingRecommendation(true)
+    setAiRecommendationModalOpen(true)
+    
+    try {
+      // Prepare data for AI analysis
+      const quotesData = doneQuotes.map(quote => ({
+        vendorName: quote.vendorName,
+        serviceCategory: quote.serviceCategory,
+        quotedPrice: quote.quotedPrice,
+        qualityScore: quote.qualityScore,
+        serviceDetails: quote.serviceDetails,
+        statusExtra: quote.statusExtra
+      }))
+
+      // TODO: Make API call to your LLM service
+      const response = await fetch('/api/ai-recommendation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event: selectedEvent.name,
+          quotes: quotesData
+        })
+      })
+      const data = await response.json()
+      
+      setAiRecommendation(data.recommendation)
+
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      
+      // Mock recommendation
+      const mockRecommendation = `Based on the analysis of ${done.length} completed quotes for ${selectedEvent.name}:\n\n` +
+        `🏆 Top Recommendation: ${done[0]?.vendorName || 'N/A'}\n\n` +
+        `Reasons:\n` +
+        `• Highest quality score: ${done[0]?.qualityScore || 'N/A'}/10\n` +
+        `• Competitive pricing: $${done[0]?.quotedPrice || 'N/A'}\n` +
+        `• ${done[0]?.serviceCategory || 'Service'} expertise\n\n` +
+        `Alternative Options:\n` +
+        done.slice(1, 3).map((q, i) => 
+          `${i + 2}. ${q.vendorName} - $${q.quotedPrice} (Score: ${q.qualityScore}/10)`
+        ).join('\n') +
+        `\n\nConsider factors like availability, dietary requirements, and guest preferences when making your final decision.`
+      
+      setAiRecommendation(mockRecommendation)
+    } catch (error) {
+      console.error('Failed to get AI recommendation:', error)
+      setAiRecommendation('Failed to generate recommendation. Please try again.')
+    } finally {
+      setLoadingRecommendation(false)
+    }
+  }
+
+  const closeAiRecommendationModal = () => {
+    setAiRecommendationModalOpen(false)
+    setAiRecommendation('')
   }
 
   if (selectedEvent) {
@@ -232,8 +293,32 @@ function ExistingEvents({ onNavigate }) {
           </div>
 
           <div className="kanban-column done">
-            <h2 className="kanban-header" style={{ backgroundColor: '#28a745', color: 'white', padding: '1rem', margin: 0 }}>
-              DONE ({done.length})
+            <h2 className="kanban-header" style={{ backgroundColor: '#28a745', color: 'white', padding: '1rem', margin: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span>DONE ({done.length})</span>
+              {done.length > 0 && (
+                <button 
+                  className="btn-ai-recommendation"
+                  onClick={() => getAiRecommendation(done)}
+                  title="Get AI-powered recommendation to help you choose the best option"
+                  disabled
+                >
+                  <svg 
+                    className="ai-sparkle"
+                    width="20" 
+                    height="20" 
+                    viewBox="0 0 20 20" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    strokeWidth="2" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round"
+                  >
+                    <path d="M12 3L13.5 9.5L20 11L13.5 12.5L12 19L10.5 12.5L4 11L10.5 9.5L12 3Z"/>
+                    <path d="M18 2L18.7 4.3L21 5L18.7 5.7L18 8L17.3 5.7L15 5L17.3 4.3L18 2Z"/>
+                    <path d="M5 16L5.5 17.5L7 18L5.5 18.5L5 20L4.5 18.5L3 18L4.5 17.5L5 16Z"/>
+                  </svg>
+                </button>
+              )}
             </h2>
             <div className="kanban-cards">
               {done.map(quote => (
@@ -295,6 +380,36 @@ function ExistingEvents({ onNavigate }) {
             </div>
           </div>
         </div>
+
+        {aiRecommendationModalOpen && (
+          <div className="modal-overlay" onClick={closeAiRecommendationModal}>
+            <div className="modal-content ai-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h2>✨ AI Recommendation</h2>
+                <button className="modal-close" onClick={closeAiRecommendationModal}>✕</button>
+              </div>
+              <div className="modal-body">
+                {loadingRecommendation ? (
+                  <div className="ai-loading">
+                    <div className="loading-spinner"></div>
+                    <p>Analyzing quotes and generating recommendation...</p>
+                  </div>
+                ) : (
+                  <div className="ai-recommendation-content">
+                    <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit' }}>
+                      {aiRecommendation}
+                    </pre>
+                  </div>
+                )}
+              </div>
+              <div className="modal-footer">
+                <button className="btn-cancel" onClick={closeAiRecommendationModal}>
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {replyModalOpen && selectedQuote && (
           <div className="modal-overlay" onClick={closeReplyModal}>
