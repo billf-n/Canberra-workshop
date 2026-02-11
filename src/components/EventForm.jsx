@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { fetchUserAttributes } from 'aws-amplify/auth'
 import ProgressBar from './ProgressBar'
 import StepCounter from './StepCounter'
 import EventTypeStep from './steps/EventTypeStep'
@@ -8,25 +10,31 @@ import BudgetStep from './steps/BudgetStep'
 import EventLocationStep from './steps/EventLocationStep'
 import ServicesStep from './steps/ServicesStep'
 import AdditionalInfoStep from './steps/AdditionalInfoStep'
-import AuthStep from './steps/AuthStep'
 import { saveEventToDatabase } from '../services/dynamodb'
 
 const TOTAL_STEPS = 7
 
-function EventForm({ onNavigate, onEventSubmit }) {
+function EventForm({ onNavigate, onEventSubmit, user }) {
   const [currentStep, setCurrentStep] = useState(1)
   const [submitError, setSubmitError] = useState('')
+  const navigate = useNavigate()
   const [formData, setFormData] = useState({
     eventType: '',
     eventTypeDetails: '',
     eventDate: '',
     guests: '',
-    guestEstimate: '',
     budget: '',
     eventLocation: '',
     services: [],
     additionalInfo: ''
   })
+
+  useEffect(() => {
+    // Redirect to signin if not authenticated
+    if (!user) {
+      navigate('/signin', { state: { from: '/new-event' } })
+    }
+  }, [user, navigate])
 
   const updateFormData = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -44,55 +52,30 @@ function EventForm({ onNavigate, onEventSubmit }) {
     }
   }
 
-  const [authenticatedUser, setAuthenticatedUser] = useState(null)
+  const handleFinalSubmit = async () => {
+    if (!user) {
+      navigate('/signin', { state: { from: '/new-event' } })
+      return
+    }
 
-  const handleAuthSuccess = async (user) => {
     try {
-      // Get user ID and email from Cognito user object
-      const userId = user.userId || user.username
-
-      // Fetch user attributes to get email
-      const { fetchUserAttributes } = await import('aws-amplify/auth')
+      // Get user attributes
       const attributes = await fetchUserAttributes()
+      const userId = attributes.sub
       const userEmail = attributes.email
       const userName = attributes.name || ''
-
-      console.log('User authenticated:', { userId, userEmail, userName })
-
-      // Store authenticated user
-      setAuthenticatedUser({
-        userId,
-        email: userEmail,
-        name: userName,
-        attributes
-      })
-
-      // Automatically submit the event
-      await handleFinalSubmit({
-        userId,
-        email: userEmail,
-        name: userName
-      })
-    } catch (error) {
-      console.error('Error getting user attributes:', error)
-      alert('There was an error processing your authentication. Please try again.')
-    }
-  }
-
-  const handleFinalSubmit = async (userData) => {
-    try {
-      // User is authenticated, save event to DynamoDB
+      
       const eventWithUser = {
         ...formData,
-        userId: userData.userId,
-        userEmail: userData.email,
-        userName: userData.name
+        userId,
+        userEmail,
+        userName
       }
       
       console.log('Saving event to DynamoDB:', eventWithUser)
       
       // Save to DynamoDB
-      const result = await saveEventToDatabase(formData, userData.userId)
+      const result = await saveEventToDatabase(formData, userId)
       
       console.log('Event saved successfully to DynamoDB:', result)
 
@@ -108,13 +91,14 @@ function EventForm({ onNavigate, onEventSubmit }) {
         eventTypeDetails: '',
         eventDate: '',
         guests: '',
+        budget: '',
+        eventLocation: '',
         services: [],
         additionalInfo: ''
       })
       setCurrentStep(1)
       setSubmitError('')
-      setAuthenticatedUser(null)
-      onNavigate('landing')
+      onNavigate('')
     } catch (error) {
       console.error('Error saving event:', error)
       setSubmitError(`Failed to save event: ${error.message}`)
@@ -124,13 +108,6 @@ function EventForm({ onNavigate, onEventSubmit }) {
 
   const renderStep = () => {
     switch (currentStep) {
-      case 0:
-        return (
-          <AuthStep
-            onSuccess={handleAuthSuccess}
-            nextStep={nextStep}
-          />
-        )
       case 1:
         return (
           <EventTypeStep
@@ -138,8 +115,6 @@ function EventForm({ onNavigate, onEventSubmit }) {
             eventTypeDetails={formData.eventTypeDetails}
             updateFormData={updateFormData}
             nextStep={nextStep}
-            prevStep={prevStep}
-            isFirstStep={true}
           />
         )
       case 2:
@@ -155,7 +130,6 @@ function EventForm({ onNavigate, onEventSubmit }) {
         return (
           <GuestCountStep
             guests={formData.guests}
-            guestEstimate={formData.guestEstimate}
             updateFormData={updateFormData}
             nextStep={nextStep}
             prevStep={prevStep}
@@ -204,11 +178,15 @@ function EventForm({ onNavigate, onEventSubmit }) {
     }
   }
 
+  if (!user) {
+    return null // Will redirect to signin
+  }
+
   return (
     <div className="container">
       <ProgressBar currentStep={currentStep} totalSteps={TOTAL_STEPS} />
       <div className="form-header">
-        <button className="btn-back-home" onClick={() => onNavigate('landing')}>
+        <button className="btn-back-home" onClick={() => onNavigate('')}>
           ← Back to Home
         </button>
         <StepCounter currentStep={currentStep} totalSteps={TOTAL_STEPS} />
