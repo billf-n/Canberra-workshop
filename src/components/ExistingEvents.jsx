@@ -13,6 +13,10 @@ function ExistingEvents({ onNavigate }) {
   const [error, setError] = useState(null)
   const [selectedEvent, setSelectedEvent] = useState(null)
   const [selectedService, setSelectedService] = useState('all')
+  const [replyModalOpen, setReplyModalOpen] = useState(false)
+  const [selectedQuote, setSelectedQuote] = useState(null)
+  const [emailSubject, setEmailSubject] = useState('')
+  const [emailBody, setEmailBody] = useState('')
 
   useEffect(() => {
     checkUser()
@@ -93,6 +97,20 @@ function ExistingEvents({ onNavigate }) {
     return Array.from(services)
   }
 
+  const openReplyModal = (quote) => {
+    setSelectedQuote(quote)
+    setEmailSubject(`Re: ${selectedEvent.name} - ${quote.serviceCategory}`)
+    setEmailBody(`Hi ${quote.vendorName},\n\nThank you for your quote regarding ${selectedEvent.name}.\n\n`)
+    setReplyModalOpen(true)
+  }
+
+  const closeReplyModal = () => {
+    setReplyModalOpen(false)
+    setSelectedQuote(null)
+    setEmailSubject('')
+    setEmailBody('')
+  }
+
   if (selectedEvent) {
     const { needsAction, pending, done, rejected } = categorizeQuotes(selectedEvent.quotes || [])
     const services = getUniqueServices(selectedEvent.quotes || [])
@@ -167,6 +185,12 @@ function ExistingEvents({ onNavigate }) {
                   <p style={{ fontSize: '0.85rem', color: '#666', marginTop: '0.5rem' }}>
                     Contact: {quote.vendorEmail}
                   </p>
+                  <button 
+                    className="btn-reply"
+                    onClick={() => openReplyModal(quote)}
+                  >
+                    📧 Reply to Vendor
+                  </button>
                 </div>
               ))}
               {needsAction.length === 0 && (
@@ -271,6 +295,56 @@ function ExistingEvents({ onNavigate }) {
             </div>
           </div>
         </div>
+
+        {replyModalOpen && selectedQuote && (
+          <div className="modal-overlay" onClick={closeReplyModal}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h2>Reply to {selectedQuote.vendorName}</h2>
+                <button className="modal-close" onClick={closeReplyModal}>✕</button>
+              </div>
+              <div className="modal-body">
+                <div className="form-group">
+                  <label>To:</label>
+                  <input 
+                    type="email" 
+                    value={selectedQuote.vendorEmail} 
+                    disabled 
+                    style={{ backgroundColor: '#f5f5f5' }}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Subject:</label>
+                  <input 
+                    type="text" 
+                    value={emailSubject}
+                    onChange={(e) => setEmailSubject(e.target.value)}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Message:</label>
+                  <textarea 
+                    value={emailBody}
+                    onChange={(e) => setEmailBody(e.target.value)}
+                    rows="10"
+                    style={{ minHeight: '200px' }}
+                  />
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button className="btn-cancel" onClick={closeReplyModal}>
+                  Cancel
+                </button>
+                <button 
+                  className="btn-send" 
+                  disabled
+                >
+                  Send Email (Coming Soon...)
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     )
   }
