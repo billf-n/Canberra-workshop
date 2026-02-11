@@ -63,8 +63,6 @@ export const saveEventToDatabase = async (eventData, userId) => {
 
 export const getEventsByUserId = async (userId) => {
   try {
-    userId = 'james-test';
-
     console.log("Currently grabbing the events using DYNAMO!");
     // Get credentials from Amplify auth session
     const session = await fetchAuthSession()
