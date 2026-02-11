@@ -304,6 +304,15 @@ function ExistingEvents({ onNavigate }) {
                 <button className="modal-close" onClick={closeReplyModal}>✕</button>
               </div>
               <div className="modal-body">
+                {selectedQuote.latestReply && (
+                  <div className="latest-reply-section">
+                    <h3>Last Received Email:</h3>
+                    <div 
+                      className="latest-reply-content"
+                      dangerouslySetInnerHTML={{ __html: selectedQuote.latestReply }}
+                    />
+                  </div>
+                )}
                 <div className="form-group">
                   <label>To:</label>
                   <input 

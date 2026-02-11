@@ -1065,6 +1065,47 @@ button:active {
     padding: var(--spacing-lg);
 }
 
+.latest-reply-section {
+    margin-bottom: var(--spacing-lg);
+    padding: var(--spacing-md);
+    background: var(--bg-light);
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+}
+
+.latest-reply-section h3 {
+    color: var(--text-dark);
+    font-size: 16px;
+    margin-bottom: var(--spacing-sm);
+}
+
+.latest-reply-content {
+    max-height: 300px;
+    overflow-y: auto;
+    padding: var(--spacing-sm);
+    background: var(--white);
+    border-radius: var(--border-radius-sm);
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-medium);
+}
+
+.latest-reply-content p {
+    margin-bottom: var(--spacing-xs);
+}
+
+.latest-reply-content ul {
+    margin-left: var(--spacing-md);
+    margin-bottom: var(--spacing-xs);
+}
+
+.latest-reply-content blockquote {
+    border-left: 3px solid var(--border-color);
+    padding-left: var(--spacing-sm);
+    margin: var(--spacing-sm) 0;
+    color: var(--text-light);
+}
+
 .modal-body .form-group {
     margin-bottom: var(--spacing-md);
 }

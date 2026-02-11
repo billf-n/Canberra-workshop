@@ -63,7 +63,7 @@ export const saveEventToDatabase = async (eventData, userId) => {
 
 export const getEventsByUserId = async (userId) => {
   try {
-    userId = 'taylorfs@icloud.com';
+    userId = 'james-test';
 
     console.log("Currently grabbing the events using DYNAMO!");
     // Get credentials from Amplify auth session
@@ -127,6 +127,7 @@ export const getEventsByUserId = async (userId) => {
           qualityScore: item.quality_score,
           startDate: item.start_date,
           lastReceivedDate: item.last_received_date,
+          latestReply: item.latest_reply,
           criteria: typeof item.criteria === 'string' ? JSON.parse(item.criteria) : item.criteria
         })
       } else {
