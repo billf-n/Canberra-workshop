@@ -875,7 +875,7 @@ button:active {
 
 .kanban-board {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: var(--spacing-md);
     margin-top: var(--spacing-lg);
 }
@@ -930,6 +930,8 @@ button:active {
     color: var(--text-medium);
     font-size: 14px;
     margin-bottom: var(--spacing-xs);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .quote-card details {

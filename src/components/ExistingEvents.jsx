@@ -61,21 +61,26 @@ function ExistingEvents({ onNavigate }) {
 
     const needsAction = []
     const pending = []
-    const good = []
+    const done = []
+    const rejected = []
 
     filteredQuotes.forEach(quote => {
-      if (quote.status === 'Quote' && quote.statusExtra?.includes('actionable but not yet finalised')) {
+      const status = quote.status?.toUpperCase()
+      
+      if (status === 'ESCALATED') {
         needsAction.push(quote)
-      } else if (quote.status === 'Pending' || quote.status === 'PENDING' || quote.statusExtra?.includes('pending')) {
+      } else if (status === 'DONE' || status === 'QUOTE') {
+        done.push(quote)
+      } else if (status === 'REJECTED') {
+        rejected.push(quote)
+      } else if (status === 'PENDING' || quote.statusExtra?.includes('pending')) {
         pending.push(quote)
-      } else if (quote.qualityScore >= 8 || quote.status === 'Confirmed') {
-        good.push(quote)
       } else {
         pending.push(quote)
       }
     })
 
-    return { needsAction, pending, good }
+    return { needsAction, pending, done, rejected }
   }
 
   const getUniqueServices = (quotes) => {
@@ -89,7 +94,7 @@ function ExistingEvents({ onNavigate }) {
   }
 
   if (selectedEvent) {
-    const { needsAction, pending, good } = categorizeQuotes(selectedEvent.quotes || [])
+    const { needsAction, pending, done, rejected } = categorizeQuotes(selectedEvent.quotes || [])
     const services = getUniqueServices(selectedEvent.quotes || [])
 
     return (
@@ -202,12 +207,12 @@ function ExistingEvents({ onNavigate }) {
             </div>
           </div>
 
-          <div className="kanban-column good">
+          <div className="kanban-column done">
             <h2 className="kanban-header" style={{ backgroundColor: '#28a745', color: 'white', padding: '1rem', margin: 0 }}>
-              GOOD ({good.length})
+              DONE ({done.length})
             </h2>
             <div className="kanban-cards">
-              {good.map(quote => (
+              {done.map(quote => (
                 <div key={quote.id} className="quote-card">
                   <h3>{quote.vendorName}</h3>
                   <p><strong>Service:</strong> {quote.serviceCategory}</p>
@@ -228,8 +233,40 @@ function ExistingEvents({ onNavigate }) {
                   </p>
                 </div>
               ))}
-              {good.length === 0 && (
-                <p style={{ padding: '1rem', color: '#666' }}>No confirmed quotes</p>
+              {done.length === 0 && (
+                <p style={{ padding: '1rem', color: '#666' }}>No completed quotes</p>
+              )}
+            </div>
+          </div>
+
+          <div className="kanban-column rejected">
+            <h2 className="kanban-header" style={{ backgroundColor: '#6c757d', color: 'white', padding: '1rem', margin: 0 }}>
+              ✕ REJECTED ({rejected.length})
+            </h2>
+            <div className="kanban-cards">
+              {rejected.map(quote => (
+                <div key={quote.id} className="quote-card">
+                  <h3>{quote.vendorName}</h3>
+                  <p><strong>Service:</strong> {quote.serviceCategory}</p>
+                  <p><strong>Price:</strong> ${quote.quotedPrice}</p>
+                  <p><strong>Quality Score:</strong> {quote.qualityScore}/10</p>
+                  <p><strong>Start Date:</strong> {quote.startDate}</p>
+                  <details>
+                    <summary>Details</summary>
+                    <p style={{ fontSize: '0.9rem', marginTop: '0.5rem' }}>{quote.serviceDetails}</p>
+                    {quote.statusExtra && (
+                      <p style={{ fontSize: '0.85rem', color: '#666', marginTop: '0.5rem' }}>
+                        <strong>Status:</strong> {quote.statusExtra}
+                      </p>
+                    )}
+                  </details>
+                  <p style={{ fontSize: '0.85rem', color: '#666', marginTop: '0.5rem' }}>
+                    Contact: {quote.vendorEmail}
+                  </p>
+                </div>
+              ))}
+              {rejected.length === 0 && (
+                <p style={{ padding: '1rem', color: '#666' }}>No rejected quotes</p>
               )}
             </div>
           </div>
