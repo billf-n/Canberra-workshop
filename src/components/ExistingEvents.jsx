@@ -44,7 +44,7 @@ function ExistingEvents({ onNavigate }) {
   }
 
   const fetchEvents = async () => {
-    setEventsLoading(true)
+    setEventsLoading(true);
     setError(null)
     try {
       const result = await getEventsByUserId(user.signInDetails.loginId);
@@ -148,7 +148,7 @@ function ExistingEvents({ onNavigate }) {
       
       // Mock recommendation
       const mockRecommendation = `Based on the analysis of ${done.length} completed quotes for ${selectedEvent.name}:\n\n` +
-        `🏆 Top Recommendation: ${done[0]?.vendorName || 'N/A'}\n\n` +
+        `🏆 Top  Recommendation: ${done[0]?.vendorName || 'N/A'}\n\n` +
         `Reasons:\n` +
         `• Highest quality score: ${done[0]?.qualityScore || 'N/A'}/10\n` +
         `• Competitive pricing: $${done[0]?.quotedPrice || 'N/A'}\n` +
