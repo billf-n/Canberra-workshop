@@ -47,7 +47,7 @@ function ExistingEvents({ onNavigate }) {
     setEventsLoading(true)
     setError(null)
     try {
-      const result = await getEventsByUserId(user.userId)
+      const result = await getEventsByUserId(user.signInDetails.loginId);
       setEvents(result.events)
     } catch (error) {
       console.error('Failed to fetch events:', error)
