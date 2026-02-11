@@ -6,7 +6,7 @@ function LoadingPage({ onNavigate }) {
   useEffect(() => {
     // Set timer to redirect after 10 seconds
     const timer = setTimeout(() => {
-      onNavigate('')
+      onNavigate('existing-events')
     }, 10000)
 
     // Animate progress bar every 50ms
@@ -49,7 +49,7 @@ function LoadingPage({ onNavigate }) {
           <p className="loading-percentage">{progress}%</p>
         </div>
         
-        <p className="loading-note">You'll be redirected to the home page shortly...</p>
+        <p className="loading-note">You'll be redirected to your events page shortly...</p>
       </div>
     </div>
   )

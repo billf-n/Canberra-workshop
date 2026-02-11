@@ -654,10 +654,20 @@ function ExistingEvents({ onNavigate }) {
   return (
     <div className="existing-events-container">
       <div className="events-header">
-        <button className="btn-back-home" onClick={() => onNavigate('')}>
-          ← Back to Home
-        </button>
+        <div className="events-header-top">
+          <button className="btn-back-home" onClick={() => onNavigate('')}>
+            ← Back to Home
+          </button>
+          <button className="btn-refresh" onClick={fetchEvents} title="Refresh events">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+            </svg>
+          </button>
+        </div>
         <h1 className="events-title">Your Events</h1>
+        <p className="events-info-text">
+          If you can't see your event, the AI is still generating vendor quotes. Please check back in a few minutes. If the issue persists, please contact IT support.
+        </p>
       </div>
 
       {error && (
