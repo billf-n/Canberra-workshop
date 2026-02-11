@@ -1,11 +1,11 @@
 :root {
-    --primary-color: #d4a574;
-    --secondary-color: #e3d661;
-    --accent-color: #d6be61;
-    --text-dark: #3e2723;
+    --primary-color: #ecdfe3;
+    --secondary-color: #c6a1aa;
+    --accent-color: #b382ae;
+    --text-dark: #6e6666;
     --text-medium: #6d4c41;
-    --text-light: #a1887f;
-    --border-color: #e0d5c7;
+    --text-light: #030202;
+    --border-color: #e0c7cd;
     --bg-light: #faf8f5;
     --bg-hover: #fff9f0;
     --white: #ffffff;
@@ -716,6 +716,10 @@ button:active {
 .form-hint {
     font-size: 12px;
     color: var(--text-light);
+}
+
+.form-hidden-input {
+    display: none;
 }
 
 .btn-auth-primary {
