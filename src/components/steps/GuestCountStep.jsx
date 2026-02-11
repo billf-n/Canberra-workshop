@@ -1,8 +1,8 @@
 import { useState } from 'react'
 
-function GuestCountStep({ guests, updateFormData, nextStep, prevStep }) {
-  const [guestRange, setGuestRange] = useState(guests && guests.includes('+') ? '150+' : guests)
-  const [customCount, setCustomCount] = useState('')
+function GuestCountStep({ guests, guestEstimate, updateFormData, nextStep, prevStep }) {
+  const [guestRange, setGuestRange] = useState(guests || '')
+  const [estimate, setEstimate] = useState(guestEstimate || '')
 
   const guestRanges = [
     { value: '1-20', label: '1-20 guests', icon: '👥' },
@@ -13,22 +13,17 @@ function GuestCountStep({ guests, updateFormData, nextStep, prevStep }) {
 
   const handleRangeChange = (value) => {
     setGuestRange(value)
-    if (value !== '150+') {
-      updateFormData('guests', value)
-      setCustomCount('')
-    }
+    updateFormData('guests', value)
   }
 
-  const handleCustomCountChange = (e) => {
+  const handleEstimateChange = (e) => {
     const value = e.target.value
-    setCustomCount(value)
-    if (value) {
-      updateFormData('guests', `${value}+`)
-    }
+    setEstimate(value)
+    updateFormData('guestEstimate', value)
   }
 
   const handleContinue = () => {
-    if (guestRange === '150+' && !customCount) {
+    if (!guestRange) {
       return
     }
     nextStep()
@@ -54,20 +49,22 @@ function GuestCountStep({ guests, updateFormData, nextStep, prevStep }) {
           </label>
         ))}
       </div>
-      {guestRange === '150+' && (
-        <input
-          type="number"
-          value={customCount}
-          onChange={handleCustomCountChange}
-          placeholder="Enter estimated number of guests"
-          min="150"
-        />
+      {guestRange && (
+        <div style={{ marginTop: '20px' }}>
+          <input
+            type="text"
+            value={estimate}
+            onChange={handleEstimateChange}
+            placeholder="Enter your estimate (optional)"
+            style={{ width: '100%' }}
+          />
+        </div>
       )}
       <div className="button-group">
         <button type="button" className="btn-back" onClick={prevStep}>
           Back
         </button>
-        <button type="button" className="btn-next" onClick={handleContinue}>
+        <button type="button" className="btn-next" onClick={handleContinue} disabled={!guestRange}>
           Continue
         </button>
       </div>

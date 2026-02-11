@@ -58,8 +58,6 @@ app.post('/api/events', authenticateToken, async (req, res) => {
     const eventData = req.body
     const userId = req.user.sub
     
-    // TODO: Save to database
-    console.log('Creating event for user:', userId, eventData)
     
     res.json({
       success: true,
@@ -75,10 +73,7 @@ app.post('/api/events', authenticateToken, async (req, res) => {
 app.get('/api/events', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.sub
-    
-    // TODO: Fetch from database
-    console.log('Fetching events for user:', userId)
-    
+        
     res.json({
       events: [
         {

@@ -123,8 +123,6 @@ form.addEventListener('submit', (e) => {
         additionalInfo: formData.get('additionalInfo')
     };
     
-    console.log('Form submitted:', data);
-    // alert('Thank you! Your event services request has been submitted.');
     
     // Reset form
     form.reset();

@@ -130,6 +130,7 @@ input[type="email"],
 input[type="tel"],
 input[type="date"],
 input[type="number"],
+input[type="password"],
 textarea {
     width: 100%;
     padding: 16px;
@@ -139,6 +140,7 @@ textarea {
     transition: all var(--transition-fast);
     font-family: inherit;
     color: var(--text-dark);
+    margin-bottom: var(--spacing-md);
 }
 
 input:focus,
@@ -804,6 +806,13 @@ button:active {
     background: var(--bg-light);
     border-color: var(--primary-color);
     transform: none;
+}
+
+.auth-switch-inline {
+    text-align: center;
+    margin-top: var(--spacing-md);
+    color: var(--text-medium);
+    font-size: 14px;
 }
 
 @media (max-width: 600px) {
