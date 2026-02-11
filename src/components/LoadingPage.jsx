@@ -4,7 +4,7 @@ function LoadingPage({ onNavigate }) {
   const [progress, setProgress] = useState(0)
 
   useEffect(() => {
-    // Set timer to redirect after 5 seconds
+    // Set timer to redirect after 10 seconds
     const timer = setTimeout(() => {
       onNavigate('')
     }, 10000)
@@ -16,7 +16,7 @@ function LoadingPage({ onNavigate }) {
           clearInterval(interval)
           return 100
         }
-        return prev + 1 // 100 / 5000 * 50 = 1% every 50ms
+        return prev + 1
       })
     }, 50)
 
@@ -27,29 +27,30 @@ function LoadingPage({ onNavigate }) {
   }, [onNavigate])
 
   return (
-    <div style={{ textAlign: 'center', marginTop: '100px', padding: '0 20px' }}>
-      <h2>Processing your event...</h2>
-      <p>The agent is analyzing your event data.</p>
-      <p>We will first jump back to the Home Page while waiting</p>
-
-      <div style={{
-        marginTop: '40px',
-        width: '100%',
-        maxWidth: '400px',
-        height: '20px',
-        backgroundColor: '#e0e0e0',
-        borderRadius: '10px',
-        margin: '40px auto 0'
-      }}>
-        <div style={{
-          height: '100%',
-          width: `${progress}%`,
-          backgroundColor: '#4caf50',
-          borderRadius: '10px',
-          transition: 'width 0.05s linear'
-        }}></div>
+    <div className="loading-page-container">
+      <div className="loading-page-content">
+        <div className="loading-icon-wrapper">
+          <div className="loading-pulse"></div>
+          <svg className="loading-icon" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/>
+          </svg>
+        </div>
+        
+        <h2 className="loading-title">Processing Your Event</h2>
+        <p className="loading-subtitle">Our AI agent is analyzing your event details and finding the best vendors for you.</p>
+        
+        <div className="loading-progress-container">
+          <div className="loading-progress-bar">
+            <div 
+              className="loading-progress-fill" 
+              style={{ width: `${progress}%` }}
+            ></div>
+          </div>
+          <p className="loading-percentage">{progress}%</p>
+        </div>
+        
+        <p className="loading-note">You'll be redirected to the home page shortly...</p>
       </div>
-      <p>{progress}%</p>
     </div>
   )
 }
