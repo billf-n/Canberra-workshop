@@ -1,7 +1,9 @@
 import { useState } from 'react'
 
-function EventTypeStep({ eventType, eventTypeDetails, updateFormData, nextStep }) {
+function EventTypeStep({ eventType, updateFormData, nextStep }) {
   const [error, setError] = useState('')
+  const [isOtherSelected, setIsOtherSelected] = useState(false)
+  const [customEventType, setCustomEventType] = useState('')
 
   const eventTypes = [
     { value: 'wedding', icon: '💒', label: 'Wedding' },
@@ -12,17 +14,26 @@ function EventTypeStep({ eventType, eventTypeDetails, updateFormData, nextStep }
   ]
 
   const handleTypeChange = (value) => {
-    updateFormData('eventType', value)
+    if (value === 'other') {
+      setIsOtherSelected(true)
+      updateFormData('eventType', customEventType)
+    } else {
+      setIsOtherSelected(false)
+      setCustomEventType('')
+      updateFormData('eventType', value)
+    }
     setError('')
   }
 
-  const handleDetailsChange = (e) => {
-    updateFormData('eventTypeDetails', e.target.value)
+  const handleCustomTypeChange = (e) => {
+    const value = e.target.value
+    setCustomEventType(value)
+    updateFormData('eventType', value)
   }
 
   const handleContinue = () => {
-    if (!eventType) {
-      setError('Please select an event type')
+    if (!eventType || (isOtherSelected && !eventType.trim())) {
+      setError('Please specify your event type')
       return
     }
     nextStep()
@@ -38,7 +49,7 @@ function EventTypeStep({ eventType, eventTypeDetails, updateFormData, nextStep }
               type="radio"
               name="eventType"
               value={type.value}
-              checked={eventType === type.value}
+              checked={type.value === 'other' ? isOtherSelected : eventType === type.value}
               onChange={() => handleTypeChange(type.value)}
               required
             />
@@ -50,13 +61,14 @@ function EventTypeStep({ eventType, eventTypeDetails, updateFormData, nextStep }
         ))}
       </div>
       {error && <div className="error-message">{error}</div>}
-      {eventType === 'other' && (
+      {isOtherSelected && (
         <input
           type="text"
           className="form-answer"
-          value={eventTypeDetails}
-          onChange={handleDetailsChange}
+          value={customEventType}
+          onChange={handleCustomTypeChange}
           placeholder="Tell us more about your event..."
+          autoFocus
         />
       )}
       <div className="button-group">

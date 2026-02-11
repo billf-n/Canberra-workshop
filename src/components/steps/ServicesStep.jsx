@@ -2,6 +2,7 @@ import { useState } from 'react'
 
 function ServicesStep({ services, updateFormData, nextStep, prevStep, error, setError }) {
   const [customService, setCustomService] = useState('')
+  const [showCustomInput, setShowCustomInput] = useState(false)
 
   const serviceOptions = [
     { value: 'catering', icon: '🍽️', label: 'Catering' },
@@ -40,7 +41,7 @@ function ServicesStep({ services, updateFormData, nextStep, prevStep, error, set
     updateFormData('services', newServices)
   }
 
-  const handleKeyPress = (e) => {
+  const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
       e.preventDefault()
       handleAddCustomService()
@@ -71,24 +72,47 @@ function ServicesStep({ services, updateFormData, nextStep, prevStep, error, set
             </span>
           </label>
         ))}
+        
+        {/* Custom Service Card */}
+        <div className="checkbox-card custom-service-card">
+          <button 
+            type="button"
+            className="custom-service-trigger"
+            onClick={() => setShowCustomInput(!showCustomInput)}
+          >
+            <span className="checkbox-content">
+              <span className="checkbox-icon">➕</span>
+              <span className="checkbox-text">Custom Service</span>
+            </span>
+          </button>
+        </div>
       </div>
       
-      <div className="custom-service-input">
-        <input
-          type="text"
-          value={customService}
-          onChange={(e) => setCustomService(e.target.value)}
-          onKeyPress={handleKeyPress}
-          placeholder="Add a custom service to search for..."
-        />
-        <button 
-          type="button" 
-          className="btn-add-service"
-          onClick={handleAddCustomService}
-        >
-          Add
-        </button>
-      </div>
+      {/* Custom Service Input Below Grid */}
+      {showCustomInput && (
+        <div className="custom-service-input">
+          <input
+            type="text"
+            value={customService}
+            onChange={(e) => setCustomService(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Enter custom service name..."
+            autoFocus
+          />
+          <button 
+            type="button" 
+            className={`btn-add-service ${customService.trim() ? 'active' : ''}`}
+            onClick={() => {
+              handleAddCustomService()
+              if (customService.trim()) {
+                setShowCustomInput(false)
+              }
+            }}
+          >
+            Add
+          </button>
+        </div>
+      )}
 
       {services.filter(s => !isPresetService(s)).length > 0 && (
         <div className="custom-services-list">

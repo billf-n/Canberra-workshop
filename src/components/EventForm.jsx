@@ -21,7 +21,6 @@ function EventForm({ onNavigate, onEventSubmit, user }) {
   const navigate = useNavigate()
   const [formData, setFormData] = useState({
     eventType: '',
-    eventTypeDetails: '',
     eventDate: '',
     guests: '',
     budget: '',
@@ -121,7 +120,6 @@ function EventForm({ onNavigate, onEventSubmit, user }) {
         return (
           <EventTypeStep
             eventType={formData.eventType}
-            eventTypeDetails={formData.eventTypeDetails}
             updateFormData={updateFormData}
             nextStep={nextStep}
           />
