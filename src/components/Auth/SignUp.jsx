@@ -1,7 +1,9 @@
 import { useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { signUp, confirmSignUp } from 'aws-amplify/auth'
 
-function SignUp({ onSuccess, onSwitchToSignIn }) {
+function SignUp({ onSuccess, onSwitchToSignIn, onBack }) {
+  const location = useLocation()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -117,6 +119,12 @@ function SignUp({ onSuccess, onSwitchToSignIn }) {
   return (
     <div className="auth-form-container">
       <div className="auth-form-card">
+        {onBack && (
+          <button className="btn-back-link" onClick={onBack}>
+            ← Back to Home
+          </button>
+        )}
+        
         <h1 className="auth-title">Create Account</h1>
         <p className="auth-subtitle">Sign up to get started</p>
 
@@ -189,7 +197,7 @@ function SignUp({ onSuccess, onSwitchToSignIn }) {
             <button 
               type="button"
               className="btn-link" 
-              onClick={onSwitchToSignIn}
+              onClick={() => onSwitchToSignIn(location.state)}
             >
               Sign in
             </button>

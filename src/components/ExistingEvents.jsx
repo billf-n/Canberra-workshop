@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react'
 import { getCurrentUser } from 'aws-amplify/auth'
-import SignIn from './Auth/SignIn'
-import SignUp from './Auth/SignUp'
+import { useNavigate } from 'react-router-dom'
 import { getEventsByUserId } from '../services/dynamodb'
 
 function ExistingEvents({ onNavigate }) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [authView, setAuthView] = useState('signIn') // 'signIn' or 'signUp'
+  const navigate = useNavigate()
   const [events, setEvents] = useState([])
   const [eventsLoading, setEventsLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -34,6 +33,8 @@ function ExistingEvents({ onNavigate }) {
       setUser(currentUser)
     } catch (error) {
       setUser(null)
+      // Redirect to signin if not authenticated
+      navigate('/signin', { state: { from: '/existing-events' } })
     } finally {
       setLoading(false)
     }
@@ -362,7 +363,7 @@ function ExistingEvents({ onNavigate }) {
     return (
       <div className="existing-events-container">
         <div className="events-header">
-          <button className="btn-back-home" onClick={() => onNavigate('landing')}>
+          <button className="btn-back-home" onClick={() => onNavigate('')}>
             ← Back to Home
           </button>
         </div>
@@ -375,35 +376,13 @@ function ExistingEvents({ onNavigate }) {
   }
 
   if (!user) {
-    return (
-      <div className="existing-events-container">
-        <div className="events-header">
-          <button className="btn-back-home" onClick={() => onNavigate('landing')}>
-            ← Back to Home
-          </button>
-          <h1 className="events-title">Sign In to View Your Events</h1>
-        </div>
-        <div className="auth-container">
-          {authView === 'signIn' ? (
-            <SignIn 
-              onSuccess={handleSignInSuccess}
-              onSwitchToSignUp={() => setAuthView('signUp')}
-            />
-          ) : (
-            <SignUp 
-              onSuccess={() => setAuthView('signIn')}
-              onSwitchToSignIn={() => setAuthView('signIn')}
-            />
-          )}
-        </div>
-      </div>
-    )
+    return null // Will redirect to signin
   }
 
   return (
     <div className="existing-events-container">
       <div className="events-header">
-        <button className="btn-back-home" onClick={() => onNavigate('landing')}>
+        <button className="btn-back-home" onClick={() => onNavigate('')}>
           ← Back to Home
         </button>
         <h1 className="events-title">Your Events</h1>

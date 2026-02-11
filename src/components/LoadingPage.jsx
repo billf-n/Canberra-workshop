@@ -6,7 +6,7 @@ function LoadingPage({ onNavigate }) {
   useEffect(() => {
     // Set timer to redirect after 5 seconds
     const timer = setTimeout(() => {
-      onNavigate('landing')
+      onNavigate('')
     }, 10000)
 
     // Animate progress bar every 50ms
