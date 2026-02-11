@@ -51,53 +51,69 @@ function EventForm({ onNavigate, onEventSubmit, user }) {
 
   // 🔹 Handle final submit directly to n8n
   const handleFinalSubmit = async () => {
-    setSubmitting(true)
-    setSubmitError('')
+  setSubmitting(true)
+  setSubmitError('')
 
-    try {
-      if (!user) {
-        navigate('/signin', { state: { from: '/new-event' } })
-        return
-      }
+  try {
+    if (!user) {
+      navigate('/signin', { state: { from: '/new-event' } })
+      return
+    }
 
-      const response = await fetch('https://selinaaaaa.app.n8n.cloud/webhook-test/d6866489-aad7-4cd0-9f11-d04af7edffad', {
+    // 🔹 Fetch Cognito attributes (more reliable for email/name)
+    const attributes = await fetchUserAttributes()
+
+    const eventPayload = {
+      ...formData,
+
+      // Prefer Cognito sub as stable unique ID
+      userId:
+        user?.userId ||
+        user?.username ||
+        attributes?.sub ||
+        '',
+
+      // Prefer loginId, fallback to Cognito email
+      userEmail:
+        user?.signInDetails?.loginId ||
+        attributes?.email ||
+        '',
+
+      userName:
+        attributes?.name ||
+        '',
+
+      submittedAt: new Date().toISOString()
+    }
+
+    console.log('Final payload being sent to n8n:', eventPayload)
+
+    const response = await fetch(
+      'https://selinaaaaa.app.n8n.cloud/webhook-test/d6866489-aad7-4cd0-9f11-d04af7edffad',
+      {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      })
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+        body: JSON.stringify(eventPayload)
       }
+    )
 
-      await response.json().catch(() => { })
-      console.log('Event submitted successfully, agent analyzing...')
-
-      // Reset form
-      setFormData({
-        eventType: '',
-        eventTypeDetails: '',
-        eventDate: '',
-        guests: '',
-        guestEstimate: '',
-        budget: '',
-        eventLocation: '',
-        services: [],
-        additionalInfo: ''
-      })
-      setCurrentStep(1)
-      setSubmitError('')
-      
-      // Navigate to loading page
-      navigate('/loading')
-    } catch (error) {
-      console.error('Submission error:', error)
-      setSubmitError(`Failed to submit event: ${error.message}`)
-      alert(`There was an error submitting your event: ${error.message}`)
-    } finally {
-      setSubmitting(false)
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
     }
+
+    await response.json().catch(() => {})
+    console.log('Event submitted successfully, agent analyzing...')
+
+    navigate('/loading')
+
+  } catch (error) {
+    console.error('Submission error:', error)
+    setSubmitError(`Failed to submit event: ${error.message}`)
+  } finally {
+    setSubmitting(false)
   }
+}
+
 
   const renderStep = () => {
     switch (currentStep) {
