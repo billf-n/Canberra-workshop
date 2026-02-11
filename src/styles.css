@@ -1844,3 +1844,24 @@ button:active {
         height: 30px;
     }
 }
+
+/* Refresh Animation */
+.kanban-board.refreshing,
+.events-list.refreshing {
+    animation: refreshFlick 0.3s ease-in-out;
+}
+
+@keyframes refreshFlick {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.3;
+        transform: scale(0.98);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}

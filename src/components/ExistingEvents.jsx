@@ -23,6 +23,7 @@ function ExistingEvents({ onNavigate }) {
   const [selectedVendor, setSelectedVendor] = useState(null)
   const [confirmModalOpen, setConfirmModalOpen] = useState(false)
   const [vendorToConfirm, setVendorToConfirm] = useState(null)
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
   useEffect(() => {
     checkUser()
@@ -71,6 +72,7 @@ function ExistingEvents({ onNavigate }) {
   const fetchEvents = async () => {
     setEventsLoading(true)
     setError(null)
+    setIsRefreshing(true)
     try {
       const result = await getEventsByUserId(user.signInDetails.loginId);
       setEvents(result.events)
@@ -79,6 +81,7 @@ function ExistingEvents({ onNavigate }) {
       setError('Failed to load events. Please try again.')
     } finally {
       setEventsLoading(false)
+      setTimeout(() => setIsRefreshing(false), 300)
     }
   }
 
@@ -148,15 +151,17 @@ function ExistingEvents({ onNavigate }) {
       // Prepare data for AI analysis
       const quotesData = doneQuotes.map(quote => ({
         vendorName: quote.vendorName,
+        vendorEmail: quote.vendorEmail,
         serviceCategory: quote.serviceCategory,
         quotedPrice: quote.quotedPrice,
         qualityScore: quote.qualityScore,
         serviceDetails: quote.serviceDetails,
-        statusExtra: quote.statusExtra
+        statusExtra: quote.statusExtra,
+        startDate: quote.startDate
       }))
 
-      // TODO: Make API call to your LLM service
-      const response = await fetch('/api/ai-recommendation', {
+      // Call the AI API
+      const response = await fetch('https://selinaaaaa.app.n8n.cloud/webhook/summarise', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -164,27 +169,13 @@ function ExistingEvents({ onNavigate }) {
           quotes: quotesData
         })
       })
-      const data = await response.json()
-      
-      setAiRecommendation(data.recommendation)
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      // Response is plain text, not JSON
+      const textResponse = await response.text()
+      console.log('AI Recommendation Response:', textResponse)
       
-      // Mock recommendation
-      const mockRecommendation = `Based on the analysis of ${done.length} completed quotes for ${selectedEvent.name.replace(/_/g, ' ')}:\n\n` +
-        `🏆 Top Recommendation: ${done[0]?.vendorName || 'N/A'}\n\n` +
-        `Reasons:\n` +
-        `• Highest quality score: ${done[0]?.qualityScore || 'N/A'}/10\n` +
-        `• Competitive pricing: $${done[0]?.quotedPrice || 'N/A'}\n` +
-        `• ${done[0]?.serviceCategory || 'Service'} expertise\n\n` +
-        `Alternative Options:\n` +
-        done.slice(1, 3).map((q, i) => 
-          `${i + 2}. ${q.vendorName} - $${q.quotedPrice} (Score: ${q.qualityScore}/10)`
-        ).join('\n') +
-        `\n\nConsider factors like availability, dietary requirements, and guest preferences when making your final decision.`
-      
-      setAiRecommendation(mockRecommendation)
+      // Set the AI recommendation from the API response
+      setAiRecommendation(textResponse || 'No recommendation available')
     } catch (error) {
       console.error('Failed to get AI recommendation:', error)
       setAiRecommendation('Failed to generate recommendation. Please try again.')
@@ -257,13 +248,20 @@ function ExistingEvents({ onNavigate }) {
     return (
       <div className="existing-events-container kanban-view">
         <div className="events-header">
-          <button className="btn-back-home" onClick={() => {
-            setSelectedEvent(null)
-            setSelectedService('all')
-            setSearchParams({}) // Clear URL parameters
-          }}>
-            ← Back to Events
-          </button>
+          <div className="events-header-top">
+            <button className="btn-back-home" onClick={() => {
+              setSelectedEvent(null)
+              setSelectedService('all')
+              setSearchParams({}) // Clear URL parameters
+            }}>
+              ← Back to Events
+            </button>
+            <button className="btn-refresh" onClick={fetchEvents} title="Refresh events">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+              </svg>
+            </button>
+          </div>
           <h1 className="events-title">{selectedEvent.name.replace(/_/g, ' ')}</h1>
           {selectedEvent.date && (
             <p className="event-date-subtitle">
@@ -300,7 +298,7 @@ function ExistingEvents({ onNavigate }) {
           </div>
         )}
 
-        <div className="kanban-board">
+        <div className={`kanban-board ${isRefreshing ? 'refreshing' : ''}`}>
           <div className="kanban-column needs-action">
             <h2 className="kanban-header" style={{ backgroundColor: '#dc3545', color: 'white', padding: '1rem', margin: 0 }}>
               NEEDS ACTION ({needsAction.length})
@@ -395,7 +393,6 @@ function ExistingEvents({ onNavigate }) {
                   className="btn-ai-recommendation"
                   onClick={() => getAiRecommendation(done)}
                   title="Get AI-powered recommendation to help you choose the best option"
-                  disabled
                   style={{ position: 'absolute', right: '1rem' }}
                 >
                   <svg 
@@ -688,7 +685,7 @@ function ExistingEvents({ onNavigate }) {
           <p>Loading your events...</p>
         </div>
       ) : (
-        <div className="events-list" style={{ minHeight: '200px' }}>
+        <div className={`events-list ${isRefreshing ? 'refreshing' : ''}`} style={{ minHeight: '200px' }}>
           {events.length === 0 ? (
             <div className="no-events">
               <p>No events found</p>
