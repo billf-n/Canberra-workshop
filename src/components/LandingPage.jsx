@@ -41,7 +41,7 @@ function LandingPage({ onNavigate, user, onSignOut }) {
         <h1 className="hero-title">Event Planning Made Simple</h1>
         <p className="hero-subtitle">Plan your perfect event with ease</p>
         {user && (
-          <p className="hero-welcome">Welcome back, {user.name || user.email}!</p>
+          <p className="hero-welcome">Welcome back, {user.signInDetails.loginId.split("@")[0]}!</p>
         )}
       </div>
 

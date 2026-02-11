@@ -20,6 +20,7 @@ function App() {
   const checkAuthentication = async () => {
     try {
       const currentUser = await getCurrentUser()
+      console.log(currentUser)
       setUser(currentUser)
     } catch (error) {
       setUser(null)

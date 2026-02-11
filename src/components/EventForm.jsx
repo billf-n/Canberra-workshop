@@ -184,6 +184,8 @@ function EventForm({ onNavigate, onEventSubmit, user }) {
 
   return (
     <div className="container">
+      <input name="userId" style="display: none">{user.userId}</input>
+      <input name="userEmail" style="display: none">{user.signInDetails.loginId}</input>
       <ProgressBar currentStep={currentStep} totalSteps={TOTAL_STEPS} />
       <div className="form-header">
         <button className="btn-back-home" onClick={() => onNavigate('')}>
