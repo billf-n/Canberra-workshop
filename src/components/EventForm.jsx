@@ -19,6 +19,7 @@ function EventForm({ onNavigate, onEventSubmit, user }) {
   const [currentStep, setCurrentStep] = useState(1)
   const [submitError, setSubmitError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [hasSubmitted, setHasSubmitted] = useState(false)
   const navigate = useNavigate()
   const [formData, setFormData] = useState({
     eventName: '',
@@ -52,7 +53,14 @@ function EventForm({ onNavigate, onEventSubmit, user }) {
 
   // 🔹 Handle final submit directly to n8n
   const handleFinalSubmit = async () => {
+  // Prevent multiple submissions
+  if (hasSubmitted || submitting) {
+    console.log('Submission already in progress or completed')
+    return
+  }
+
   setSubmitting(true)
+  setHasSubmitted(true)
   setSubmitError('')
 
   try {
@@ -111,6 +119,8 @@ function EventForm({ onNavigate, onEventSubmit, user }) {
   } catch (error) {
     console.error('Submission error:', error)
     setSubmitError(`Failed to submit event: ${error.message}`)
+    // Reset submission state on error so user can retry
+    setHasSubmitted(false)
   } finally {
     setSubmitting(false)
   }
@@ -190,6 +200,8 @@ function EventForm({ onNavigate, onEventSubmit, user }) {
             updateFormData={updateFormData}
             nextStep={handleFinalSubmit}
             prevStep={prevStep}
+            submitting={submitting}
+            hasSubmitted={hasSubmitted}
           />
         )
       default:
