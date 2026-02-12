@@ -51,3 +51,6 @@ npm run preview
 - CSS Variables
 - Modern JavaScript (ES6+)
 # Canberra-workshop
+
+## Presentation Link
+https://gamma.app/docs/Automated-Event-Planning-with-AI-Agents-tuh8zspdq4kfidb
